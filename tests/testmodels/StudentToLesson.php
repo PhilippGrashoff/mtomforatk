@@ -9,8 +9,9 @@ class StudentToLesson extends MToMModel
 {
     public $table = 'student_to_lesson';
 
-    public $fieldName1 = 'student_id';
-    public $className1 = Student::class;
-    public $fieldName2 = 'lesson_id';
-    public $className2 = Lesson::class;
+    public $fieldNamesForLinkedClasses =
+        [
+            'student_id' => Student::class,
+            'lesson_id' => Lesson::class
+        ];
 }

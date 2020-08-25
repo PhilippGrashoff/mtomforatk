@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace PMRAtk\tests\phpunit\Data\Traits;
+namespace mtomforatk\tests;
 
 
-use PMRAtk\tests\TestClasses\BaseModelClasses\BaseModelA;
-use PMRAtk\tests\TestClasses\BaseModelClasses\BaseModelB;
-use PMRAtk\tests\TestClasses\AToB;
-use PMRAtk\tests\phpunit\TestCase;
+use mtomforatk\tests\testmodels\Lesson;
+use mtomforatk\tests\testmodels\Student;
+use mtomforatk\tests\testmodels\StudentToLesson;
+use atk4\core\AtkPhpunit\TestCase;
 
 /**
  * Class MToMTraitTest

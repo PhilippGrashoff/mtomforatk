@@ -12,13 +12,12 @@ use atk4\data\Model;
 abstract class MToMModel extends Model
 {
 
-    //set these four in child classes. Will be used to create hasOne Reference Fields in init()
-    //e.g. fieldName1 = tour_id, className1 = Tour::class
-    //     fieldName2 = group_id, className2 = Group::class
-    protected $fieldName1;
-    protected $className1;
-    protected $fieldName2;
-    protected $className2;
+    //array with 2 keys and 2 values. Set these four strings child classes. Will be used to create hasOne Reference Fields in init()
+    //e.g. [
+    //         'student_id' => Student::class,
+    //         'lesson_id' => Lesson::class
+    //     ]
+    public $fieldNamesForLinkedClasses = [];
 
     //array containing instances of the two linked models. Useful for re-using them and saving DB requests
     protected $referenceObjects = [];
@@ -30,10 +29,13 @@ abstract class MToMModel extends Model
     public function init(): void
     {
         parent::init();
-        $this->hasOne($this->fieldName1, [$this->className1]);
-        $this->hasOne($this->fieldName2, [$this->className2]);
-        $this->referenceObjects[$this->className1] = null;
-        $this->referenceObjects[$this->className2] = null;
+        if(count($this->fieldNamesForLinkedClasses) !== 2) {
+            throw new Exception('2 Fields and corresponding classes need to be defined in $fieldNamesForLinkedClasses array');
+        }
+        foreach($this->fieldNamesForLinkedClasses as $fieldName => $className) {
+            $this->hasOne($fieldName, [$className]);
+            $this->referenceObjects[$className] = null;
+        }
     }
 
 
@@ -48,7 +50,7 @@ abstract class MToMModel extends Model
         //load if necessary
         if(!$this->referenceObjects[$className] instanceof Model) {
             $this->referenceObjects[$className] = new $className($this->persistence);
-            $this->referenceObjects[$className]->load($this->get($className === $this->className1 ? $this->fieldName1 : $this->fieldName2));
+            $this->referenceObjects[$className]->load($this->get(array_search($className, $this->fieldNamesForLinkedClasses)));
         }
 
         return $this->referenceObjects[$className];

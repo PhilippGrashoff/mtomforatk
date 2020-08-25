@@ -1,18 +1,15 @@
 <?php declare(strict_types=1);
 
-namespace PMRAtk\tests\phpunit\Data;
+namespace mtomforatk\tests;
 
 use atk4\data\Exception;
-use atk4\data\Model;
-use PMRAtk\tests\phpunit\TestCase;
-use PMRAtk\tests\TestClasses\AToB;
-use PMRAtk\tests\TestClasses\BaseModelClasses\BaseModelA;
-use PMRAtk\tests\TestClasses\BaseModelClasses\BaseModelB;
-use PMRAtk\tests\TestClasses\BaseModelClasses\BaseModelC;
+use atk4\core\AtkPhpunit\TestCase;
+use mtomforatk\tests\testmodels\Lesson;
+use mtomforatk\tests\testmodels\StudentToLesson;
+use mtomforatk\tests\testmodels\Student;
 
 /**
- * Class MToMModelTest
- * @package PMRAtk\tests\phpunit\Data
+ *
  */
 class MToMModelTest extends TestCase {
 

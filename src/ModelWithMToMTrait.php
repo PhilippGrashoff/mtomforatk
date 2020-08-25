@@ -5,7 +5,6 @@ namespace mtomforatk;
 use atk4\data\Exception;
 use atk4\data\Model;
 use atk4\data\Reference;
-use PMRAtk\Data\MToMModel;
 
 
 /**
@@ -15,94 +14,85 @@ trait ModelWithMToMTrait
 {
 
     /**
-     * function used to add data to the MtoM relations like GroupToTour,
-     * GuestToGroup etc.
+     * Create a new MToM relation, e.g. a new StudentToLesson record. Called from either Student or Lesson class.
      * First checks if record does exist already, and only then adds new relation.
      */
-    protected function _addMToMRelation(
-        $otherObject,
-        MToMModel $mToMObject,
-        string $otherObjectClass,
-        string $outField,
-        string $theirField,
+    protected function addMToMRelation(
+        $otherModel,
+        MToMModel $mToMModel,
+        string $otherModelClass,
         array $additionalFields = []
     ): MToMModel {
         //$this needs to be loaded to get ID
         $this->checkThisIsLoaded();
 
-        $otherObject = $this->_mToMLoadObject($otherObject, $otherObjectClass);
+        $otherModel = $this->mToMLoadObject($otherModel, $otherModelClass);
 
         //check if reference already exists, if so update existing record only
-        $mToMObject->addCondition($outField, $this->get('id'));
-        $mToMObject->addCondition($theirField, $otherObject->get('id'));
-        $mToMObject->tryLoadAny();
+        $ourField   = $this->getFieldNameFromMToMModel($this);
+        $theirField = $this->getFieldNameFromMToMModel($otherModel);
+        $mToMModel->addCondition($ourField, $this->get('id'));
+        $mToMModel->addCondition($theirField, $otherModel->get('id'));
+        $mToMModel->tryLoadAny();
 
-        //set values and conditions
-        $mToMObject->set($outField, $this->get('id'));
-        $mToMObject->set($theirField, $otherObject->get('id'));
+        //set values
+        $mToMModel->set($ourField, $this->get('id'));
+        $mToMModel->set($theirField, $otherModel->get('id'));
 
         //set additional field values
         foreach ($additionalFields as $field_name => $value) {
-            $mToMObject->set($field_name, $value);
+            $mToMModel->set($field_name, $value);
         }
 
-        //no reload neccessary after insert
-        $mToMObject->reload_after_save = false;
+        //no reload necessary after insert
+        $mToMModel->reload_after_save = false;
         //if that record already exists mysql will throw an error if unique index is set, catch here
-        $mToMObject->save();
-        $mToMObject->addLoadedObject($this);
-        $mToMObject->addLoadedObject($otherObject);
+        $mToMModel->save();
+        $mToMModel->addLoadedObject($this);
+        $mToMModel->addLoadedObject($otherModel);
 
-        return $mToMObject;
+        return $mToMModel;
     }
 
 
     /**
-     * function used to remove a record the MtoM relations like GroupToTour,
+     * function used to remove a MToMModel record like StudentToLesson. Either used from Student or Lesson class.
      * GuestToGroup etc.
      */
-    protected function _removeMToMRelation(
-        $otherObject,
-        MToMModel $mToMObject,
-        string $otherObjectClass,
-        string $ourField,
-        string $theirField
+    protected function removeMToMRelation(
+        $otherModel,
+        MToMModel $mToMModel,
+        string $otherModelClass
     ): MToMModel {
         //$this needs to be loaded to get ID
         $this->checkThisIsLoaded();
 
-        $otherObject = $this->_mToMLoadObject($otherObject, $otherObjectClass);
+        $otherModel = $this->mToMLoadObject($otherModel, $otherModelClass);
 
-        $mToMObject->addCondition($ourField, $this->get('id'));
-        $mToMObject->addCondition($theirField, $otherObject->get('id'));
-        $mToMObject->loadAny();
-        $mToMObject->delete();
+        $mToMModel->addCondition($this->getFieldNameFromMToMModel($this), $this->get('id'));
+        $mToMModel->addCondition($this->getFieldNameFromMToMModel($otherModel), $otherModel->get('id'));
+        $mToMModel->loadAny();
+        $mToMModel->delete();
 
-        return $mToMObject;
+        return $mToMModel;
     }
 
 
     /**
-     * checks if a MtoM reference to the given object exists or not
-     *
-     * @param object The object to check if its referenced with $this
-     * @param object The MToM Refence class, e.g. GroupToTour
-     *
-     * @return bool
+     * checks if a MtoM reference to the given object exists or not, e.g. if a StudentToLesson record exists for a
+     * specific student and lesson
      */
-    protected function _hasMToMRelation(
-        $otherObject,
+    protected function hasMToMRelation(
+        $otherModel,
         MToMModel $mToMModel,
-        string $otherObjectClass,
-        string $ourField,
-        string $theirField
+        string $otherModelClass
     ): bool {
         $this->checkThisIsLoaded();
 
-        $otherObject = $this->_mToMLoadObject($otherObject, $otherObjectClass);
+        $otherModel = $this->mToMLoadObject($otherModel, $otherModelClass);
 
-        $mToMModel->addCondition($ourField, $this->get('id'));
-        $mToMModel->addCondition($theirField, $otherObject->get('id'));
+        $mToMModel->addCondition($this->getFieldNameFromMToMModel($this), $this->get('id'));
+        $mToMModel->addCondition($this->getFieldNameFromMToMModel($otherModel), $otherModel->get('id'));
         $mToMModel->tryLoadAny();
 
         return $mToMModel->loaded();
@@ -111,9 +101,9 @@ trait ModelWithMToMTrait
 
     /**
      * helper function for MToMFunctions: Loads the object if only id is passed,
-     * else checks if object matches rules
+     * else checks if object is of the right class
      */
-    private function _mToMLoadObject($object, string $objectClass): Model
+    private function mToMLoadObject($object, string $objectClass): Model
     {
         //if object is passed, extract id
         if (is_object($object)) {
@@ -138,7 +128,7 @@ trait ModelWithMToMTrait
 
 
     /**
-     * In each MToM operation, $this needs to be loaded to pull id.
+     * In each MToM operation, $this needs to be loaded to pull id. This function throws an exception if its not.
      */
     protected function checkThisIsLoaded(): void {
         if(!$this->loaded()) {
@@ -152,7 +142,11 @@ trait ModelWithMToMTrait
      * 2) adds after delete hook which deletes any intermediate model linked to the deleted "main" model. This way, no outdated intermediate models exist.
      * Returns HasMany reference for further modifying reference if needed.
      */
-    protected function addMToMReference(string $mtomClassName, string $referenceName = '', array $referenceDefaults = []): Reference\HasMany {
+    protected function addMToMReferenceAndDeleteHook(
+        string $mtomClassName,
+        string $referenceName = '',
+        array $referenceDefaults = []
+    ): Reference\HasMany {
         //if no reference name was passed, use Class name without namespace
         if(!$referenceName) {
             $referenceName = (new \ReflectionClass($mtomClassName))->getShortName();
@@ -169,5 +163,18 @@ trait ModelWithMToMTrait
         );
 
         return $reference;
+    }
+    
+    
+    /**
+     * selects the corresponding field name from MToMModel setting, e.g. "student_id" when Student is passed as Model
+     */
+    protected function getFieldNameFromMToMModel(Model $model, MToMModel $mToMModel): string {
+        $fieldName = array_search(get_class($model), $mToMModel->fieldNamesForLinkedClasses);
+        if(!$fieldName) {
+            throw new Exception('No field name defined in ' . get_class($mToMModel) . '->fieldNamesForLinkedClasses for Class ' . get_class($model));
+        }
+
+        return $fieldName;
     }
 }
