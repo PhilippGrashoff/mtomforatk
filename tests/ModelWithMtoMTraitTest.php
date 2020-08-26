@@ -7,190 +7,200 @@ use mtomforatk\tests\testmodels\Lesson;
 use mtomforatk\tests\testmodels\Student;
 use mtomforatk\tests\testmodels\StudentToLesson;
 use atk4\core\AtkPhpunit\TestCase;
+use atk4\data\Persistence;
+use atk4\data\Exception;
 
 /**
  * Class MToMTraitTest
  * @package PMRAtk\tests\phpunit\Data\Traits
  */
-class MToMTraitTest extends TestCase {
+class ModelWithMtoMTraitTest extends TestCase {
 
-    /*
+    /**
      * Tests the MToM adding functionality
      */
     public function testMToMAdding() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
+        $b = new Lesson($persistence);
         $a->save();
         $b->save();
 
-        $mtom_count = (new AToB(self::$app->db))->action('count')->getOne();
-        $this->callProtected($a, '_addMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
-        $this->assertEquals($mtom_count + 1, (new AToB(self::$app->db))->action('count')->getOne());
+        $mtom_count = (new StudentToLesson($persistence))->action('count')->getOne();
+        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+        self::assertEquals($mtom_count + 1, (new StudentToLesson($persistence))->action('count')->getOne());
 
         //adding again shouldnt create a new record
-       $this->callProtected($a, '_addMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
-        $this->assertEquals($mtom_count + 1, (new AToB(self::$app->db))->action('count')->getOne());
+       $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+        self::assertEquals($mtom_count + 1, (new StudentToLesson($persistence))->action('count')->getOne());
     }
 
 
-    /*
+    /**
      * see if $this not loaded throws exception in adding MTOm
      */
     public function testMToMAddingThrowExceptionThisNotLoaded() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
+        $b = new Lesson($persistence);
         $b->save();
 
-        $this->expectException(\atk4\data\Exception::class);
-        $this->callProtected($a, '_addMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
+        self::expectException(Exception::class);
+        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
     }
 
 
-    /*
+    /**
      * see if $object not loaded throws exception in adding MTOm
      */
     public function testMToMAddingThrowExceptionObjectNotLoaded() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
+        $b = new Lesson($persistence);
         $a->save();
 
-        $this->expectException(\atk4\data\Exception::class);
-        $this->callProtected($a, '_addMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
+        self::expectException(Exception::class);
+        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
     }
 
 
-    /*
+    /**
      * test adding by id
      */
     public function testMToMAddingById() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
+        $b = new Lesson($persistence);
         $a->save();
         $b->save();
 
-        $mtom_count = (new AToB(self::$app->db))->action('count')->getOne();
-        $this->callProtected($a, '_addMToMRelation', [$b->get('id'), new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
-        $this->assertEquals($mtom_count + 1, (new AToB(self::$app->db))->action('count')->getOne());
+        $mtom_count = (new StudentToLesson($persistence))->action('count')->getOne();
+        $this->callProtected($a, 'addMToMRelation', $b->get('id'), new StudentToLesson($persistence));
+        self::assertEquals($mtom_count + 1, (new StudentToLesson($persistence))->action('count')->getOne());
     }
 
 
-    /*
+    /**
      * test adding by invalid id
      */
     public function testMToMAddingByInvalidId() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
         $a->save();
-        $b->save();
 
-        $this->expectException(\atk4\data\Exception::class);
-        $this->callProtected($a, '_addMToMRelation', [11111, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
+        self::expectException(Exception::class);
+        $this->callProtected($a, 'addMToMRelation', 11111, new StudentToLesson($persistence));
     }
 
 
-    /*
+    /**
      * Tests the MToM removal functionality
      */
     public function testMToMRemoval() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
+        $b = new Lesson($persistence);
         $a->save();
         $b->save();
 
-        $mtom_count = (new AToB(self::$app->db))->action('count')->getOne();
-        $this->callProtected($a, '_addMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
-        $this->assertEquals($mtom_count + 1, (new AToB(self::$app->db))->action('count')->getOne());
+        $mtom_count = (new StudentToLesson($persistence))->action('count')->getOne();
+        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+        self::assertEquals($mtom_count + 1, (new StudentToLesson($persistence))->action('count')->getOne());
 
-        $this->callProtected($a, '_removeMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
+        $this->callProtected($a, 'removeMToMRelation', $b, new StudentToLesson($persistence));
         //should be removed
-        $this->assertEquals($mtom_count, (new AToB(self::$app->db))->action('count')->getOne());
+        self::assertEquals($mtom_count, (new StudentToLesson($persistence))->action('count')->getOne());
         //trying to remove again shouldnt work but throw exception
-        $this->expectException(\atk4\data\Exception::class);
-        $this->callProtected($a, '_removeMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
+        self::expectException(Exception::class);
+        $this->callProtected($a, 'removeMToMRelation', $b, new StudentToLesson($persistence));
     }
 
 
-    /*
+    /**
      * see if $this not loaded throws exception in removing MTOm
      */
     public function testMToMRemovalThrowExceptionThisNotLoaded() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
+        $b = new Lesson($persistence);
         $b->save();
 
-        $this->expectException(\atk4\data\Exception::class);
-        $this->callProtected($a, '_removeMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
+        self::expectException(Exception::class);
+        $this->callProtected($a, 'removeMToMRelation', $b, new StudentToLesson($persistence));
     }
 
 
-    /*
+    /**
      * see if $object not loaded throws exception in removing MTOm
      */
     public function testMToMRemovalThrowExceptionObjectNotLoaded() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
+        $b = new Lesson($persistence);
         $a->save();
 
-        $this->expectException(\atk4\data\Exception::class);
-        $this->callProtected($a, '_removeMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
+        self::expectException(Exception::class);
+        $this->callProtected($a, 'removeMToMRelation', $b, new StudentToLesson($persistence));
     }
 
 
-    /*
+    /**
      * test hasMToM
      */
     public function testHasMToMReference() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
+        $b = new Lesson($persistence);
         $a->save();
         $b->save();
-        $this->callProtected($a, '_addMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
+        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
 
-        $this->assertTrue($this->callProtected($a, '_hasMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']));
-        $this->assertTrue($this->callProtected($b, '_hasMToMRelation', [$a, new AToB(self::$app->db), BaseModelA::class, 'BaseModelB_id', 'BaseModelA_id']));
+        self::assertTrue($this->callProtected($a, 'hasMToMRelation', $b, new StudentToLesson($persistence)));
+        self::assertTrue($this->callProtected($b, 'hasMToMRelation', $a, new StudentToLesson($persistence)));
 
-        $this->callProtected($a, '_removeMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
-        $this->assertFalse($this->callProtected($a, '_hasMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']));
-        $this->assertFalse($this->callProtected($b, '_hasMToMRelation', [$a, new AToB(self::$app->db), BaseModelA::class, 'BaseModelB_id', 'BaseModelA_id']));
+        $this->callProtected($a, 'removeMToMRelation', $b, new StudentToLesson($persistence));
+        self::assertFalse($this->callProtected($a, 'hasMToMRelation', $b, new StudentToLesson($persistence)));
+        self::assertFalse($this->callProtected($b, 'hasMToMRelation', $a, new StudentToLesson($persistence)));
     }
 
 
-    /*
+    /**
      * see if $this not loaded throws exception in removing MTOm
      */
-    public function testMToMHasThrowExceptionThisNotLoaded() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+    public function testhasMToMRelationThrowExceptionThisNotLoaded() {
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
+        $b = new Lesson($persistence);
         $b->save();
 
-        $this->expectException(\atk4\data\Exception::class);
-        $this->callProtected($a, '_hasMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
+        self::expectException(Exception::class);
+        $this->callProtected($a, 'hasMToMRelation', $b, new StudentToLesson($persistence));
     }
 
 
-    /*
+    /**
      * see if $object not loaded throws exception in removing MTOm
      */
-    public function testMToMHasThrowExceptionObjectNotLoaded() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+    public function testhasMToMRelationThrowExceptionObjectNotLoaded() {
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
+        $b = new Lesson($persistence);
         $a->save();
 
-        $this->expectException(\atk4\data\Exception::class);
-        $this->callProtected($a, '_hasMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
+        self::expectException(Exception::class);
+        $this->callProtected($a, 'hasMToMRelation', $b, new StudentToLesson($persistence));
     }
 
 
-    /*
+    /**
      * see if exception is thrown when wrong class type is passed in MToMAdding
      */
     public function testMToMAddingWrongClassException() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
         $a->save();
-        $b->save();
-        $this->expectException(\atk4\data\Exception::class);
-        $this->callProtected($a, '_addMToMRelation', [$a, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
+        self::expectException(Exception::class);
+        $this->callProtected($a, 'addMToMRelation', $a, new StudentToLesson($persistence));
     }
 
 
@@ -198,27 +208,29 @@ class MToMTraitTest extends TestCase {
      * see if exception is thrown when wrong class type is passed in MToMRemoval
      */
     public function testMToMRemovalWrongClassException() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
+        $b = new Lesson($persistence);
         $a->save();
         $b->save();
-        $this->callProtected($a, '_addMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
-        $this->expectException(\atk4\data\Exception::class);
-        $this->callProtected($a, '_removeMToMRelation', [$a, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
+        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+        self::expectException(Exception::class);
+        $this->callProtected($a, 'removeMToMRelation', $a, new StudentToLesson($persistence));
     }
 
 
     /*
      * see if exception is thrown when wrong class type is passed in HasMToM
      */
-    public function testMToMHasWrongClassException() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+    public function testhasMToMRelationWrongClassException() {
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
+        $b = new Lesson($persistence);
         $a->save();
         $b->save();
-        $this->callProtected($a, '_addMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
-        $this->expectException(\atk4\data\Exception::class);
-        $this->callProtected($a, '_hasMToMRelation', [$a, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
+        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+        self::expectException(Exception::class);
+        $this->callProtected($a, 'hasMToMRelation', $a, new StudentToLesson($persistence));
     }
 
 
@@ -226,20 +238,21 @@ class MToMTraitTest extends TestCase {
      *
      */
     public function testAddAdditionalFields() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
+        $b = new Lesson($persistence);
         $a->save();
         $b->save();
 
-        $mtom_count = (new AToB(self::$app->db))->action('count')->getOne();
-        $this->callProtected($a, '_addMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id', ['test1' => 'LALA']]);
-        $this->assertEquals($mtom_count + 1, (new AToB(self::$app->db))->action('count')->getOne());
+        $mtom_count = (new StudentToLesson($persistence))->action('count')->getOne();
+        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence), ['name' => 'LALA']);
+        self::assertEquals($mtom_count + 1, (new StudentToLesson($persistence))->action('count')->getOne());
 
-        $mtommodel = new AToB(self::$app->db);
+        $mtommodel = new StudentToLesson($persistence);
         $mtommodel->setOrder('id desc');
         $mtommodel->setLimit(0,1);
         foreach($mtommodel as $m) {
-            $this->assertEquals($m->get('test1'), 'LALA');
+            self::assertEquals($m->get('test1'), 'LALA');
         }
     }
 
@@ -248,14 +261,15 @@ class MToMTraitTest extends TestCase {
      *
      */
     public function testMToMModelIsReturned() {
-        $a = new BaseModelA(self::$app->db);
-        $b = new BaseModelB(self::$app->db);
+        $persistence = new Persistence\Array_();
+        $a = new Student($persistence);
+        $b = new Lesson($persistence);
         $a->save();
         $b->save();
 
-        $res = $this->callProtected($a, '_addMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id', ['test1' => 'LALA']]);
-        self::assertInstanceOf(AToB::class, $res);
-        $res = $this->callProtected($a, '_removeMToMRelation', [$b, new AToB(self::$app->db), BaseModelB::class, 'BaseModelA_id', 'BaseModelB_id']);
-        self::assertInstanceOf(AToB::class, $res);
+        $res = $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+        self::assertInstanceOf(StudentToLesson::class, $res);
+        $res = $this->callProtected($a, 'removeMToMRelation', $b, new StudentToLesson($persistence));
+        self::assertInstanceOf(StudentToLesson::class, $res);
     }
 }

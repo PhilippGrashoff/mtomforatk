@@ -24,15 +24,15 @@ class Lesson extends Model
         $this->addMToMReferenceAndDeleteHook(StudentToLesson::class);
     }
 
-    public function addStudent($student) {
-        return $this->addMToMRelation($student, new StudentToLesson($this->persistence), Lesson::class, 'lesson_id', 'student_id');
+    public function addStudent($student, array $additionalFields = []) {
+        return $this->addMToMRelation($student, new StudentToLesson($this->persistence), $additionalFields);
     }
 
     public function removeStudent($student) {
-        return $this->removeMToMRelation($student, new StudentToLesson($this->persistence), Lesson::class, 'lesson_id', 'student_id');
+        return $this->removeMToMRelation($student, new StudentToLesson($this->persistence));
     }
 
     public function hasStudentRelation($student) {
-        return $this->hasMToMRelation($student, new StudentToLesson($this->persistence), Lesson::class, 'lesson_id', 'student_id');
+        return $this->hasMToMRelation($student, new StudentToLesson($this->persistence));
     }
 }

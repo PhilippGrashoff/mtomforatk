@@ -32,6 +32,13 @@ abstract class MToMModel extends Model
         if(count($this->fieldNamesForLinkedClasses) !== 2) {
             throw new Exception('2 Fields and corresponding classes need to be defined in $fieldNamesForLinkedClasses array');
         }
+        if(
+            !class_exists(reset($this->fieldNamesForLinkedClasses))
+            || !class_exists(end($this->fieldNamesForLinkedClasses))
+        ) {
+            throw new Exception('Non existant Class defined in $fieldNamesForLinkedClasses array');
+        }
+
         foreach($this->fieldNamesForLinkedClasses as $fieldName => $className) {
             $this->hasOne($fieldName, [$className]);
             $this->referenceObjects[$className] = null;
@@ -67,5 +74,36 @@ abstract class MToMModel extends Model
         }
 
         $this->referenceObjects[$modelClass] = $model;
+    }
+
+
+    /**
+     *
+     */
+    public function getFieldNameForModel(Model $model): string {
+        $fieldName = array_search(get_class($model), $this->fieldNamesForLinkedClasses);
+        if(!$fieldName) {
+            throw new Exception('No field name defined in ' . __CLASS__ . '->fieldNamesForLinkedClasses for Class ' . get_class($model));
+        }
+
+        return $fieldName;
+    }
+
+
+    /**
+     * We will have 2 Model classes defined which the MToMmodel will connect. This function returns the class name of
+     * the other class if one is passed
+     */
+    public function getOtherModelClass(Model $model): string {
+        $modelClass = get_class($model);
+        if(!in_array($modelClass, $this->fieldNamesForLinkedClasses)) {
+            throw new Exception('Class ' . $modelClass . 'not found in fieldNamesForLinkedClasses');
+        }
+
+        //as array has 2 elements, return second if passed class is the first, else otherwise
+        if(reset($this->fieldNamesForLinkedClasses) === $modelClass) {
+            return end($this->fieldNamesForLinkedClasses);
+        }
+        return reset($this->fieldNamesForLinkedClasses);
     }
 }

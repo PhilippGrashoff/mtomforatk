@@ -20,17 +20,16 @@ trait ModelWithMToMTrait
     protected function addMToMRelation(
         $otherModel,
         MToMModel $mToMModel,
-        string $otherModelClass,
         array $additionalFields = []
     ): MToMModel {
         //$this needs to be loaded to get ID
         $this->checkThisIsLoaded();
 
-        $otherModel = $this->mToMLoadObject($otherModel, $otherModelClass);
+        $otherModel = $this->getOtherModelRecord($otherModel, $mToMModel);
 
         //check if reference already exists, if so update existing record only
-        $ourField   = $this->getFieldNameFromMToMModel($this);
-        $theirField = $this->getFieldNameFromMToMModel($otherModel);
+        $ourField   = $mToMModel->getFieldNameForModel($this);
+        $theirField = $mToMModel->getFieldNameForModel($otherModel);
         $mToMModel->addCondition($ourField, $this->get('id'));
         $mToMModel->addCondition($theirField, $otherModel->get('id'));
         $mToMModel->tryLoadAny();
@@ -40,8 +39,9 @@ trait ModelWithMToMTrait
         $mToMModel->set($theirField, $otherModel->get('id'));
 
         //set additional field values
-        foreach ($additionalFields as $field_name => $value) {
-            $mToMModel->set($field_name, $value);
+        foreach ($additionalFields as $fieldName => $value) {
+            var_dump($fieldName);
+            $mToMModel->set($fieldName, $value);
         }
 
         //no reload necessary after insert
@@ -61,16 +61,15 @@ trait ModelWithMToMTrait
      */
     protected function removeMToMRelation(
         $otherModel,
-        MToMModel $mToMModel,
-        string $otherModelClass
+        MToMModel $mToMModel
     ): MToMModel {
         //$this needs to be loaded to get ID
         $this->checkThisIsLoaded();
 
-        $otherModel = $this->mToMLoadObject($otherModel, $otherModelClass);
+        $otherModel = $this->getOtherModelRecord($otherModel, $mToMModel);
 
-        $mToMModel->addCondition($this->getFieldNameFromMToMModel($this), $this->get('id'));
-        $mToMModel->addCondition($this->getFieldNameFromMToMModel($otherModel), $otherModel->get('id'));
+        $mToMModel->addCondition($mToMModel->getFieldNameForModel($this), $this->get('id'));
+        $mToMModel->addCondition($mToMModel->getFieldNameForModel($otherModel), $otherModel->get('id'));
         $mToMModel->loadAny();
         $mToMModel->delete();
 
@@ -84,46 +83,17 @@ trait ModelWithMToMTrait
      */
     protected function hasMToMRelation(
         $otherModel,
-        MToMModel $mToMModel,
-        string $otherModelClass
+        MToMModel $mToMModel
     ): bool {
         $this->checkThisIsLoaded();
 
-        $otherModel = $this->mToMLoadObject($otherModel, $otherModelClass);
+        $otherModel = $this->getOtherModelRecord($otherModel, $mToMModel);
 
-        $mToMModel->addCondition($this->getFieldNameFromMToMModel($this), $this->get('id'));
-        $mToMModel->addCondition($this->getFieldNameFromMToMModel($otherModel), $otherModel->get('id'));
+        $mToMModel->addCondition($mToMModel->getFieldNameForModel($this), $this->get('id'));
+        $mToMModel->addCondition($mToMModel->getFieldNameForModel($otherModel), $otherModel->get('id'));
         $mToMModel->tryLoadAny();
 
         return $mToMModel->loaded();
-    }
-
-
-    /**
-     * helper function for MToMFunctions: Loads the object if only id is passed,
-     * else checks if object is of the right class
-     */
-    private function mToMLoadObject($object, string $objectClass): Model
-    {
-        //if object is passed, extract id
-        if (is_object($object)) {
-            //check if passed object is of desired type
-            if (!$object instanceof $objectClass) {
-                throw new Exception('Wrong class:' . get_class($object) . ' was passed, ' . $objectClass . ' was expected in ' . __FUNCTION__);
-            }
-        }
-        else {
-            $object_id = $object;
-            $object = new $objectClass($this->persistence);
-            $object->tryLoad($object_id);
-        }
-
-        //make sure object is loaded
-        if (!$object->loaded()) {
-            throw new Exception('Object could not be loaded in ' . __FUNCTION__);
-        }
-
-        return $object;
     }
 
 
@@ -164,17 +134,30 @@ trait ModelWithMToMTrait
 
         return $reference;
     }
-    
-    
+
+
     /**
-     * selects the corresponding field name from MToMModel setting, e.g. "student_id" when Student is passed as Model
+     *
      */
-    protected function getFieldNameFromMToMModel(Model $model, MToMModel $mToMModel): string {
-        $fieldName = array_search(get_class($model), $mToMModel->fieldNamesForLinkedClasses);
-        if(!$fieldName) {
-            throw new Exception('No field name defined in ' . get_class($mToMModel) . '->fieldNamesForLinkedClasses for Class ' . get_class($model));
+    protected function getOtherModelRecord($otherModel, MToMModel $mToMModel): Model {
+        $otherModelClass = $mToMModel->getOtherModelClass($this);
+        if(is_object($otherModel)) {
+            //only check if its a model of the correct class; also check if accidently $this was passed
+            if(get_class($otherModel) !== $otherModelClass) {
+                throw new Exception('Object of wrong class was passed: ' . $mToMModel->getOtherModelClass($this) . 'expected, ' . get_class($otherModel) . ' passed.');
+            }
+        }
+        else {
+            $id = $otherModel;
+            $otherModel = new $otherModelClass($this->persistence);
+            $otherModel->tryLoad($id);
         }
 
-        return $fieldName;
+        //make sure object is loaded
+        if (!$otherModel->loaded()) {
+            throw new Exception('Object could not be loaded in ' . __FUNCTION__);
+        }
+
+        return $otherModel;
     }
 }
