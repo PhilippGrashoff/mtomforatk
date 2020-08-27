@@ -7,7 +7,7 @@ use mtomforatk\tests\testmodels\Lesson;
 use mtomforatk\tests\testmodels\Student;
 use mtomforatk\tests\testmodels\StudentToLesson;
 use atk4\core\AtkPhpunit\TestCase;
-use atk4\data\Persistence;
+use mtomforatk\tests\testmodels\TmpPersistenceArray;
 use atk4\data\Exception;
 
 /**
@@ -20,18 +20,18 @@ class ModelWithMtoMTraitTest extends TestCase {
      * Tests the MToM adding functionality
      */
     public function testMToMAdding() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $b = new Lesson($persistence);
-        $a->save();
-        $b->save();
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $student->save();
+        $lesson->save();
 
         $mtom_count = (new StudentToLesson($persistence))->action('count')->getOne();
-        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+        $this->callProtected($student, 'addMToMRelation', $lesson, new StudentToLesson($persistence));
         self::assertEquals($mtom_count + 1, (new StudentToLesson($persistence))->action('count')->getOne());
 
         //adding again shouldnt create a new record
-       $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+       $this->callProtected($student, 'addMToMRelation', $lesson, new StudentToLesson($persistence));
         self::assertEquals($mtom_count + 1, (new StudentToLesson($persistence))->action('count')->getOne());
     }
 
@@ -40,13 +40,13 @@ class ModelWithMtoMTraitTest extends TestCase {
      * see if $this not loaded throws exception in adding MTOm
      */
     public function testMToMAddingThrowExceptionThisNotLoaded() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $b = new Lesson($persistence);
-        $b->save();
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $lesson->save();
 
         self::expectException(Exception::class);
-        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+        $this->callProtected($student, 'addMToMRelation', $lesson, new StudentToLesson($persistence));
     }
 
 
@@ -54,13 +54,13 @@ class ModelWithMtoMTraitTest extends TestCase {
      * see if $object not loaded throws exception in adding MTOm
      */
     public function testMToMAddingThrowExceptionObjectNotLoaded() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $b = new Lesson($persistence);
-        $a->save();
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $student->save();
 
         self::expectException(Exception::class);
-        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+        $this->callProtected($student, 'addMToMRelation', $lesson, new StudentToLesson($persistence));
     }
 
 
@@ -68,14 +68,14 @@ class ModelWithMtoMTraitTest extends TestCase {
      * test adding by id
      */
     public function testMToMAddingById() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $b = new Lesson($persistence);
-        $a->save();
-        $b->save();
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $student->save();
+        $lesson->save();
 
         $mtom_count = (new StudentToLesson($persistence))->action('count')->getOne();
-        $this->callProtected($a, 'addMToMRelation', $b->get('id'), new StudentToLesson($persistence));
+        $this->callProtected($student, 'addMToMRelation', $lesson->get('id'), new StudentToLesson($persistence));
         self::assertEquals($mtom_count + 1, (new StudentToLesson($persistence))->action('count')->getOne());
     }
 
@@ -84,12 +84,12 @@ class ModelWithMtoMTraitTest extends TestCase {
      * test adding by invalid id
      */
     public function testMToMAddingByInvalidId() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $a->save();
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $student->save();
 
         self::expectException(Exception::class);
-        $this->callProtected($a, 'addMToMRelation', 11111, new StudentToLesson($persistence));
+        $this->callProtected($student, 'addMToMRelation', 11111, new StudentToLesson($persistence));
     }
 
 
@@ -97,22 +97,22 @@ class ModelWithMtoMTraitTest extends TestCase {
      * Tests the MToM removal functionality
      */
     public function testMToMRemoval() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $b = new Lesson($persistence);
-        $a->save();
-        $b->save();
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $student->save();
+        $lesson->save();
 
         $mtom_count = (new StudentToLesson($persistence))->action('count')->getOne();
-        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+        $this->callProtected($student, 'addMToMRelation', $lesson, new StudentToLesson($persistence));
         self::assertEquals($mtom_count + 1, (new StudentToLesson($persistence))->action('count')->getOne());
 
-        $this->callProtected($a, 'removeMToMRelation', $b, new StudentToLesson($persistence));
+        $this->callProtected($student, 'removeMToMRelation', $lesson, new StudentToLesson($persistence));
         //should be removed
         self::assertEquals($mtom_count, (new StudentToLesson($persistence))->action('count')->getOne());
         //trying to remove again shouldnt work but throw exception
         self::expectException(Exception::class);
-        $this->callProtected($a, 'removeMToMRelation', $b, new StudentToLesson($persistence));
+        $this->callProtected($student, 'removeMToMRelation', $lesson, new StudentToLesson($persistence));
     }
 
 
@@ -120,13 +120,13 @@ class ModelWithMtoMTraitTest extends TestCase {
      * see if $this not loaded throws exception in removing MTOm
      */
     public function testMToMRemovalThrowExceptionThisNotLoaded() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $b = new Lesson($persistence);
-        $b->save();
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $lesson->save();
 
         self::expectException(Exception::class);
-        $this->callProtected($a, 'removeMToMRelation', $b, new StudentToLesson($persistence));
+        $this->callProtected($student, 'removeMToMRelation', $lesson, new StudentToLesson($persistence));
     }
 
 
@@ -134,13 +134,13 @@ class ModelWithMtoMTraitTest extends TestCase {
      * see if $object not loaded throws exception in removing MTOm
      */
     public function testMToMRemovalThrowExceptionObjectNotLoaded() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $b = new Lesson($persistence);
-        $a->save();
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $student->save();
 
         self::expectException(Exception::class);
-        $this->callProtected($a, 'removeMToMRelation', $b, new StudentToLesson($persistence));
+        $this->callProtected($student, 'removeMToMRelation', $lesson, new StudentToLesson($persistence));
     }
 
 
@@ -148,19 +148,19 @@ class ModelWithMtoMTraitTest extends TestCase {
      * test hasMToM
      */
     public function testHasMToMReference() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $b = new Lesson($persistence);
-        $a->save();
-        $b->save();
-        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $student->save();
+        $lesson->save();
+        $this->callProtected($student, 'addMToMRelation', $lesson, new StudentToLesson($persistence));
 
-        self::assertTrue($this->callProtected($a, 'hasMToMRelation', $b, new StudentToLesson($persistence)));
-        self::assertTrue($this->callProtected($b, 'hasMToMRelation', $a, new StudentToLesson($persistence)));
+        self::assertTrue($this->callProtected($student, 'hasMToMRelation', $lesson, new StudentToLesson($persistence)));
+        self::assertTrue($this->callProtected($lesson, 'hasMToMRelation', $student, new StudentToLesson($persistence)));
 
-        $this->callProtected($a, 'removeMToMRelation', $b, new StudentToLesson($persistence));
-        self::assertFalse($this->callProtected($a, 'hasMToMRelation', $b, new StudentToLesson($persistence)));
-        self::assertFalse($this->callProtected($b, 'hasMToMRelation', $a, new StudentToLesson($persistence)));
+        $this->callProtected($student, 'removeMToMRelation', $lesson, new StudentToLesson($persistence));
+        self::assertFalse($this->callProtected($student, 'hasMToMRelation', $lesson, new StudentToLesson($persistence)));
+        self::assertFalse($this->callProtected($lesson, 'hasMToMRelation', $student, new StudentToLesson($persistence)));
     }
 
 
@@ -168,13 +168,13 @@ class ModelWithMtoMTraitTest extends TestCase {
      * see if $this not loaded throws exception in removing MTOm
      */
     public function testhasMToMRelationThrowExceptionThisNotLoaded() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $b = new Lesson($persistence);
-        $b->save();
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $lesson->save();
 
         self::expectException(Exception::class);
-        $this->callProtected($a, 'hasMToMRelation', $b, new StudentToLesson($persistence));
+        $this->callProtected($student, 'hasMToMRelation', $lesson, new StudentToLesson($persistence));
     }
 
 
@@ -182,13 +182,13 @@ class ModelWithMtoMTraitTest extends TestCase {
      * see if $object not loaded throws exception in removing MTOm
      */
     public function testhasMToMRelationThrowExceptionObjectNotLoaded() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $b = new Lesson($persistence);
-        $a->save();
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $student->save();
 
         self::expectException(Exception::class);
-        $this->callProtected($a, 'hasMToMRelation', $b, new StudentToLesson($persistence));
+        $this->callProtected($student, 'hasMToMRelation', $lesson, new StudentToLesson($persistence));
     }
 
 
@@ -196,11 +196,11 @@ class ModelWithMtoMTraitTest extends TestCase {
      * see if exception is thrown when wrong class type is passed in MToMAdding
      */
     public function testMToMAddingWrongClassException() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $a->save();
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $student->save();
         self::expectException(Exception::class);
-        $this->callProtected($a, 'addMToMRelation', $a, new StudentToLesson($persistence));
+        $this->callProtected($student, 'addMToMRelation', $student, new StudentToLesson($persistence));
     }
 
 
@@ -208,14 +208,14 @@ class ModelWithMtoMTraitTest extends TestCase {
      * see if exception is thrown when wrong class type is passed in MToMRemoval
      */
     public function testMToMRemovalWrongClassException() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $b = new Lesson($persistence);
-        $a->save();
-        $b->save();
-        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $student->save();
+        $lesson->save();
+        $this->callProtected($student, 'addMToMRelation', $lesson, new StudentToLesson($persistence));
         self::expectException(Exception::class);
-        $this->callProtected($a, 'removeMToMRelation', $a, new StudentToLesson($persistence));
+        $this->callProtected($student, 'removeMToMRelation', $student, new StudentToLesson($persistence));
     }
 
 
@@ -223,14 +223,14 @@ class ModelWithMtoMTraitTest extends TestCase {
      * see if exception is thrown when wrong class type is passed in HasMToM
      */
     public function testhasMToMRelationWrongClassException() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $b = new Lesson($persistence);
-        $a->save();
-        $b->save();
-        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $student->save();
+        $lesson->save();
+        $this->callProtected($student, 'addMToMRelation', $lesson, new StudentToLesson($persistence));
         self::expectException(Exception::class);
-        $this->callProtected($a, 'hasMToMRelation', $a, new StudentToLesson($persistence));
+        $this->callProtected($student, 'hasMToMRelation', $student, new StudentToLesson($persistence));
     }
 
 
@@ -238,22 +238,20 @@ class ModelWithMtoMTraitTest extends TestCase {
      *
      */
     public function testAddAdditionalFields() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $b = new Lesson($persistence);
-        $a->save();
-        $b->save();
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $student->save();
+        $lesson->save();
 
         $mtom_count = (new StudentToLesson($persistence))->action('count')->getOne();
-        $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence), ['name' => 'LALA']);
+        $this->callProtected($student, 'addMToMRelation', $lesson, new StudentToLesson($persistence), ['some_other_field' => 'LALA']);
         self::assertEquals($mtom_count + 1, (new StudentToLesson($persistence))->action('count')->getOne());
 
         $mtommodel = new StudentToLesson($persistence);
-        $mtommodel->setOrder('id desc');
-        $mtommodel->setLimit(0,1);
-        foreach($mtommodel as $m) {
-            self::assertEquals($m->get('test1'), 'LALA');
-        }
+        $mtommodel->loadAny();
+        self::assertEquals($mtommodel->get('some_other_field'), 'LALA');
+
     }
 
 
@@ -261,15 +259,34 @@ class ModelWithMtoMTraitTest extends TestCase {
      *
      */
     public function testMToMModelIsReturned() {
-        $persistence = new Persistence\Array_();
-        $a = new Student($persistence);
-        $b = new Lesson($persistence);
-        $a->save();
-        $b->save();
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $student->save();
+        $lesson->save();
 
-        $res = $this->callProtected($a, 'addMToMRelation', $b, new StudentToLesson($persistence));
+        $res = $this->callProtected($student, 'addMToMRelation', $lesson, new StudentToLesson($persistence));
         self::assertInstanceOf(StudentToLesson::class, $res);
-        $res = $this->callProtected($a, 'removeMToMRelation', $b, new StudentToLesson($persistence));
+        $res = $this->callProtected($student, 'removeMToMRelation', $lesson, new StudentToLesson($persistence));
         self::assertInstanceOf(StudentToLesson::class, $res);
+    }
+
+
+    /**
+     *
+     */
+    public function testOnAfterDeleteHookDeletesMToMModel() {
+        $persistence = new TmpPersistenceArray();
+        $student = new Student($persistence);
+        $lesson = new Lesson($persistence);
+        $student->save();
+        $lesson->save();
+        $student->addLesson($lesson);
+        //new StudentToModel record created
+        $studentToLessonCount = (new StudentToLesson($persistence))->action('count')->getOne();
+        self::assertEquals(1, $studentToLessonCount);
+        $student->delete();
+        $studentToLessonCount = (new StudentToLesson($persistence))->action('count')->getOne();
+        self::assertEquals(0, $studentToLessonCount);
     }
 }

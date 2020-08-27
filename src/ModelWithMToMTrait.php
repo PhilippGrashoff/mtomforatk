@@ -40,7 +40,6 @@ trait ModelWithMToMTrait
 
         //set additional field values
         foreach ($additionalFields as $fieldName => $value) {
-            var_dump($fieldName);
             $mToMModel->set($fieldName, $value);
         }
 
