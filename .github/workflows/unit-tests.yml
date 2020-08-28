@@ -65,4 +65,4 @@ jobs:
 
       - name: "Run tests"
         if: matrix.type == 'Phpunit'
-        run: "vendor/bin/phpunit  --coverage-text -v"
+        run: vendor/bin/phpunit --coverage-text -v
