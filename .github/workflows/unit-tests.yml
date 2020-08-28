@@ -7,6 +7,15 @@ on:
     branches: '**'
 
 jobs:
+  checkforforgottenvardumps:
+    runs-on: ubuntu-latest
+    name: Test for forgotten var_dumps in code
+    steps:
+      - name: Check 1
+        id: check1
+        uses: umutphp/php-var-dump-check-action@v1
+
+
   phpinsights:
     name: PHP-Insights
     runs-on: ubuntu-latest
@@ -14,9 +23,13 @@ jobs:
       - uses: actions/checkout@master
       - name: PHP-Insights
         uses: docker://tienvx/phpinsights-action
+
+
   magicnumbercheck:
     name: Php Magic Number Check
     uses: umutphp/php-magic-number-check-action@v1
+
+    
   unit-test:
     name: Unit
     runs-on: ubuntu-latest
@@ -31,8 +44,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-            with:
-              persist-credentials: false
 
       - name: Setup cache 1/2
         id: composer-cache
