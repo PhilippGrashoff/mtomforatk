@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Test for forgotten var_dumps in code
     steps:
-      - name: Check 1
+      - name: Check for var_dumps
         id: check1
         uses: umutphp/php-var-dump-check-action@v1
 
@@ -27,9 +27,12 @@ jobs:
 
   magicnumbercheck:
     name: Php Magic Number Check
-    uses: umutphp/php-magic-number-check-action@v1
+    steps:
+      - name: Check for magic numbers
+        id: check2
+        uses: umutphp/php-magic-number-check-action@v1
 
-    
+
   unit-test:
     name: Unit
     runs-on: ubuntu-latest
