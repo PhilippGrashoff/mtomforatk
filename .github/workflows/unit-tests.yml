@@ -25,14 +25,6 @@ jobs:
         uses: docker://tienvx/phpinsights-action
 
 
-  magicnumbercheck:
-    name: Php Magic Number Check
-    steps:
-      - name: Check for magic numbers
-        id: check2
-        uses: umutphp/php-magic-number-check-action@v1
-
-
   unit-test:
     name: Unit
     runs-on: ubuntu-latest
