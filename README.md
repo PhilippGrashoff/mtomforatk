@@ -1,4 +1,6 @@
 # mtomforatk
+[![codecov](https://codecov.io/gh/PhilippGrashoff/mtomforatk/branch/master/graph/badge.svg)](https://codecov.io/gh/PhilippGrashoff/mtomforatk)
+
 An addition to atk4/data to easily manage Many To Many (MToM) Relations. The purpose
 is to write as little code as possible for actual MToM operations.
 
