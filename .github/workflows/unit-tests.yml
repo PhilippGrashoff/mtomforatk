@@ -7,6 +7,16 @@ on:
     branches: '**'
 
 jobs:
+  phpinsights:
+    name: PHP-Insights
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: PHP-Insights
+        uses: docker://tienvx/phpinsights-action
+  magicnumbercheck:
+    name: Php Magic Number Check
+    uses: umutphp/php-magic-number-check-action@v1
   unit-test:
     name: Unit
     runs-on: ubuntu-latest

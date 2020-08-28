@@ -124,7 +124,7 @@ trait ModelWithMToMTrait
         $reference = $this->hasMany($referenceName, array_merge([$mtomClassName], $referenceDefaults));
         $this->onHook(
             Model::HOOK_AFTER_DELETE,
-            function ($model) use ($referenceName) {
+            function ($model) use ($referenceName): void {
                 foreach($model->ref($referenceName) as $mtomModel) {
                     $mtomModel->delete();
                 }
