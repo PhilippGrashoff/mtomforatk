@@ -138,7 +138,9 @@ trait ModelWithMToMTrait
 
 
     /**
-     *
+     * Used to load the other model if only Id was passed.
+     * Make sure passed model is of the correct class.
+     * Check other model is loaded so id can be gotten.
      */
     protected function getOtherModelRecord($otherModel, MToMModel $mToMModel): Model
     {
