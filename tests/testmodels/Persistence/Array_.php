@@ -1,10 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace mtomforatk\tests\testmodels;
+namespace mtomforatk\tests\testmodels\Persistence;
 
 use atk4\data\Exception;
 use atk4\data\Model;
-use atk4\data\Persistence\Array_;
 
 /**
  * Temporary for making tests work with loadAny().
@@ -12,7 +11,7 @@ use atk4\data\Persistence\Array_;
  * https://github.com/atk4/data/pull/696
  * https://github.com/atk4/data/pull/690
  */
-class TmpPersistenceArray extends Array_ {
+class Array_ extends \atk4\data\Persistence\Array_ {
 
     /**
      * Tries to load first available record and return data record.

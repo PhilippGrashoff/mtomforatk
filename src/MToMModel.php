@@ -29,6 +29,7 @@ abstract class MToMModel extends Model
     public function init(): void
     {
         parent::init();
+        //make sure 2 classes to link are defined
         if(count($this->fieldNamesForReferencedClasses) !== 2) {
             throw new Exception('2 Fields and corresponding classes need to be defined in fieldNamesForReferencedClasses array');
         }
@@ -36,7 +37,7 @@ abstract class MToMModel extends Model
             !class_exists(reset($this->fieldNamesForReferencedClasses))
             || !class_exists(end($this->fieldNamesForReferencedClasses))
         ) {
-            throw new Exception('Non existant Class defined in fieldNamesForReferencedClasses array');
+            throw new Exception('Non existent Class defined in fieldNamesForReferencedClasses array');
         }
 
         foreach($this->fieldNamesForReferencedClasses as $fieldName => $className) {
@@ -47,7 +48,9 @@ abstract class MToMModel extends Model
 
 
     /**
-     *
+     * Shortcut to get a record from each of the linked classes. e.g.
+     * $studentToLesson = $student->addLesson(4); //add Lesson by id, no lesson object yet
+     * $lesson = $studentToLesson->getObject(Lesson::class); //will return Lesson record with Id 4
      */
     public function getObject(string $className): ?Model {
         if(!array_key_exists($className, $this->referenceObjects)) {
@@ -55,8 +58,9 @@ abstract class MToMModel extends Model
         }
 
         //load if necessary
-        if(!$this->referenceObjects[$className] instanceof Model) {
+        if(!$this->referenceObjects[$className] instanceof $className) {
             $this->referenceObjects[$className] = new $className($this->persistence);
+            //will throw exception if record isn't found
             $this->referenceObjects[$className]->load($this->get(array_search($className, $this->fieldNamesForReferencedClasses)));
         }
 
@@ -65,7 +69,7 @@ abstract class MToMModel extends Model
 
 
     /**
-     *
+     * used by ModelWithMToMTrait to make records available in getObject() without extra DB request
      */
     public function addLoadedObject(Model $model): void {
         $modelClass = get_class($model);
@@ -78,7 +82,7 @@ abstract class MToMModel extends Model
 
 
     /**
-     *
+     * used by ModelWithMToMTrait to get the correct
      */
     public function getFieldNameForModel(Model $model): string {
         $fieldName = array_search(get_class($model), $this->fieldNamesForReferencedClasses);
@@ -87,6 +91,14 @@ abstract class MToMModel extends Model
         }
 
         return $fieldName;
+    }
+
+
+    /**
+     * results ín e.g. $this->addCondition('student_id', 5);
+     */
+    public function addConditionForModel(Model $model) {
+        $this->addCondition($this->getFieldNameForModel($model), $model->get($model->id_field));
     }
 
 

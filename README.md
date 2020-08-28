@@ -17,7 +17,8 @@ $student = new Student($app->db);
 $student->save();
 
 //Add Lesson by its ID
-$student->addLesson(1); //creates a new StudentToLesson record
+$studentToLesson = $student->addLesson(1); //creates a new StudentToLesson record
+$lessonWithId1 = $studentToLesson->getObject(Lesson::class); //easy way to get Lesson object. No extra DB query is used.
 //remove lesson by its ID
 $student->removeLesson(1); //removes the StudentToLesson record
 

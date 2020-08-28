@@ -28,15 +28,13 @@ trait ModelWithMToMTrait
         $otherModel = $this->getOtherModelRecord($otherModel, $mToMModel);
 
         //check if reference already exists, if so update existing record only
-        $ourField = $mToMModel->getFieldNameForModel($this);
-        $theirField = $mToMModel->getFieldNameForModel($otherModel);
-        $mToMModel->addCondition($ourField, $this->get('id'));
-        $mToMModel->addCondition($theirField, $otherModel->get('id'));
+        $mToMModel->addConditionForModel($this);
+        $mToMModel->addConditionForModel($otherModel);
         $mToMModel->tryLoadAny();
 
         //set values
-        $mToMModel->set($ourField, $this->get('id'));
-        $mToMModel->set($theirField, $otherModel->get('id'));
+        $mToMModel->set($mToMModel->getFieldNameForModel($this), $this->get('id'));
+        $mToMModel->set($mToMModel->getFieldNameForModel($otherModel), $otherModel->get('id'));
 
         //set additional field values
         foreach ($additionalFields as $fieldName => $value) {
@@ -67,8 +65,8 @@ trait ModelWithMToMTrait
 
         $otherModel = $this->getOtherModelRecord($otherModel, $mToMModel);
 
-        $mToMModel->addCondition($mToMModel->getFieldNameForModel($this), $this->get('id'));
-        $mToMModel->addCondition($mToMModel->getFieldNameForModel($otherModel), $otherModel->get('id'));
+        $mToMModel->addConditionForModel($this);
+        $mToMModel->addConditionForModel($otherModel);
         $mToMModel->loadAny();
         $mToMModel->delete();
 
@@ -88,8 +86,8 @@ trait ModelWithMToMTrait
 
         $otherModel = $this->getOtherModelRecord($otherModel, $mToMModel);
 
-        $mToMModel->addCondition($mToMModel->getFieldNameForModel($this), $this->get('id'));
-        $mToMModel->addCondition($mToMModel->getFieldNameForModel($otherModel), $otherModel->get('id'));
+        $mToMModel->addConditionForModel($this);
+        $mToMModel->addConditionForModel($otherModel);
         $mToMModel->tryLoadAny();
 
         return $mToMModel->loaded();

@@ -8,18 +8,17 @@ use mtomforatk\MToMModel;
 use mtomforatk\tests\testmodels\Lesson;
 use mtomforatk\tests\testmodels\StudentToLesson;
 use mtomforatk\tests\testmodels\Student;
-use atk4\data\Persistence;
+use mtomforatk\tests\testmodels\Persistence;
 use atk4\data\Model;
 
 /**
  *
  */
-class MToMModelTest extends TestCase {
+class MToMModelTest extends TestCase
+{
 
-    /**
-     *
-     */
-    public function testInit() {
+    public function testInit()
+    {
         $persistence = new Persistence\Array_();
         $studentToLesson = new StudentToLesson($persistence);
         self::assertTrue($studentToLesson->hasField('student_id'));
@@ -28,11 +27,8 @@ class MToMModelTest extends TestCase {
         self::assertTrue($studentToLesson->hasRef('lesson_id'));
     }
 
-
-    /**
-     *
-     */
-    public function testExceptionMoreThanTwoElementsInFieldNamesForReferencedClasses() {
+    public function testExceptionMoreThanTwoElementsInFieldNamesForReferencedClasses()
+    {
         $persistence = new Persistence\Array_();
         $someClassWith3Elements = new class() extends MToMModel {
             protected $fieldNamesForReferencedClasses = [
@@ -45,11 +41,8 @@ class MToMModelTest extends TestCase {
         new $someClassWith3Elements($persistence);
     }
 
-
-    /**
-     *
-     */
-    public function testExceptionLessThanTwoElementsInFieldNamesForReferencedClasses() {
+    public function testExceptionLessThanTwoElementsInFieldNamesForReferencedClasses()
+    {
         $persistence = new Persistence\Array_();
         $someClassWith1Element = new class() extends MToMModel {
             protected $fieldNamesForReferencedClasses = [
@@ -60,11 +53,8 @@ class MToMModelTest extends TestCase {
         $instance = new $someClassWith1Element($persistence);
     }
 
-
-    /**
-     *
-     */
-    public function testExceptionInvalidClassInFieldNamesForReferencedClasses() {
+    public function testExceptionInvalidClassInFieldNamesForReferencedClasses()
+    {
         $persistence = new Persistence\Array_();
         $someClassWithInvalidClassDefinition = new class() extends MToMModel {
             protected $fieldNamesForReferencedClasses = [
@@ -76,11 +66,8 @@ class MToMModelTest extends TestCase {
         $instance = new $someClassWithInvalidClassDefinition($persistence);
     }
 
-
-    /**
-     *
-     */
-    public function testReferenceObjectKeysCreatedInArray() {
+    public function testReferenceObjectKeysCreatedInArray()
+    {
         $persistence = new Persistence\Array_();
         $studentToLesson = new StudentToLesson($persistence);
         $referenceObjects = (new \ReflectionClass($studentToLesson))->getProperty('referenceObjects');
@@ -91,17 +78,16 @@ class MToMModelTest extends TestCase {
         self::assertArrayHasKey(Lesson::class, $value);
     }
 
-
-    /**
-     *
-     */
-    public function testAddLoadedObject() {
+    public function testAddLoadedObject()
+    {
         $persistence = new Persistence\Array_();
         $student = new Student($persistence);
         $student->save();
         $studentToLesson = new StudentToLesson($persistence);
         $studentToLesson->addLoadedObject($student);
-        $props = (new \ReflectionClass($studentToLesson))->getProperty('referenceObjects');//getProperties(\ReflectionProperty::IS_PROTECTED);
+        $props = (new \ReflectionClass($studentToLesson))->getProperty(
+            'referenceObjects'
+        );//getProperties(\ReflectionProperty::IS_PROTECTED);
         $props->setAccessible(true);
         $value = $props->getValue($studentToLesson);
         self::assertSame(
@@ -110,11 +96,8 @@ class MToMModelTest extends TestCase {
         );
     }
 
-
-    /**
-     *
-     */
-    public function testAddLoadedObjectExceptionWrongClassPassed() {
+    public function testAddLoadedObjectExceptionWrongClassPassed()
+    {
         $persistence = new Persistence\Array_();
         $otherClass = new class() extends Model {
             public $table = 'sometable';
@@ -125,11 +108,8 @@ class MToMModelTest extends TestCase {
         $studentToLesson->addLoadedObject($model);
     }
 
-
-    /**
-     *
-     */
-    public function testgetObject() {
+    public function testgetObject()
+    {
         $persistence = new Persistence\Array_();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
@@ -150,58 +130,65 @@ class MToMModelTest extends TestCase {
         self::assertSame($lesson, $resB);
     }
 
-
-    /**
-     *
-     */
-    public function testgetObjectExceptionInvalidClass() {
+    public function testgetObjectExceptionInvalidClass()
+    {
         $persistence = new Persistence\Array_();
         $studentToLesson = new StudentToLesson($persistence);
         self::expectException(Exception::class);
         $resA = $studentToLesson->getObject('SomeNonSetClass');
     }
 
-
-    /**
-     *
-     */
-    public function testgetFieldNameForModel() {
+    public function testgetFieldNameForModel()
+    {
         $persistence = new Persistence\Array_();
         $studentToLesson = new StudentToLesson($persistence);
         self::assertSame('student_id', $studentToLesson->getFieldNameForModel(new Student($persistence)));
         self::assertSame('lesson_id', $studentToLesson->getFieldNameForModel(new Lesson($persistence)));
     }
 
-
-    /**
-     *
-     */
-    public function testgetFieldNameForModelExceptionWrongClass() {
+    public function testgetFieldNameForModelExceptionWrongClass()
+    {
         $persistence = new Persistence\Array_();
         $studentToLesson = new StudentToLesson($persistence);
         self::expectException(Exception::class);
         $studentToLesson->getFieldNameForModel(new StudentToLesson($persistence));
     }
 
-
-    /**
-     *
-     */
-    public function testGetOtherModelClass() {
+    public function testGetOtherModelClass()
+    {
         $persistence = new Persistence\Array_();
         $studentToLesson = new StudentToLesson($persistence);
         self::assertSame(Lesson::class, $studentToLesson->getOtherModelClass(new Student($persistence)));
         self::assertSame(Student::class, $studentToLesson->getOtherModelClass(new Lesson($persistence)));
     }
 
-
-    /**
-     *
-     */
-    public function testGetOtherModelClassExceptionWrongClass() {
+    public function testGetOtherModelClassExceptionWrongClass()
+    {
         $persistence = new Persistence\Array_();
         $studentToLesson = new StudentToLesson($persistence);
         self::expectException(Exception::class);
         $studentToLesson->getOtherModelClass(new StudentToLesson($persistence));
+    }
+
+    public function testAddConditionForModel()
+    {
+        $persistence = new Persistence\Array_();
+        $lesson = new Lesson($persistence);
+        $lesson->set('id', 234);
+        $student = new Student($persistence);
+        $student->set('id', 456);
+        $studentToLesson = new StudentToLesson($persistence);
+        $studentToLesson->addConditionForModel($lesson);
+        $studentToLesson->addConditionForModel($student);
+
+        $this->assertCount(2, $studentToLesson->conditions);
+        $this->assertSame(
+            ['lesson_id', 234],
+            $studentToLesson->conditions[0]
+        );
+        $this->assertSame(
+            ['student_id', 456],
+            $studentToLesson->conditions[1]
+        );
     }
 }
