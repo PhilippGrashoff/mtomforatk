@@ -28,7 +28,7 @@ trait ModelWithMToMTrait
         $otherModel = $this->getOtherModelRecord($otherModel, $mToMModel);
 
         //check if reference already exists, if so update existing record only
-        $ourField   = $mToMModel->getFieldNameForModel($this);
+        $ourField = $mToMModel->getFieldNameForModel($this);
         $theirField = $mToMModel->getFieldNameForModel($otherModel);
         $mToMModel->addCondition($ourField, $this->get('id'));
         $mToMModel->addCondition($theirField, $otherModel->get('id'));
@@ -99,16 +99,20 @@ trait ModelWithMToMTrait
     /**
      * In each MToM operation, $this needs to be loaded to pull id. This function throws an exception if its not.
      */
-    protected function checkThisIsLoaded(): void {
-        if(!$this->loaded()) {
-            throw new Exception('$this needs to be loaded in ' . debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function']);
+    protected function checkThisIsLoaded(): void
+    {
+        if (!$this->loaded()) {
+            throw new Exception(
+                '$this needs to be loaded in ' . debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function']
+            );
         }
     }
 
 
     /**
      * 1) adds HasMany Reference to intermediate model.
-     * 2) adds after delete hook which deletes any intermediate model linked to the deleted "main" model. This way, no outdated intermediate models exist.
+     * 2) adds after delete hook which deletes any intermediate model linked to the deleted "main" model.
+     *    This way, no outdated intermediate models exist.
      * Returns HasMany reference for further modifying reference if needed.
      */
     protected function addMToMReferenceAndDeleteHook(
@@ -117,7 +121,7 @@ trait ModelWithMToMTrait
         array $referenceDefaults = []
     ): Reference\HasMany {
         //if no reference name was passed, use Class name without namespace
-        if(!$referenceName) {
+        if (!$referenceName) {
             $referenceName = (new \ReflectionClass($mtomClassName))->getShortName();
         }
 
@@ -125,7 +129,7 @@ trait ModelWithMToMTrait
         $this->onHook(
             Model::HOOK_AFTER_DELETE,
             function ($model) use ($referenceName): void {
-                foreach($model->ref($referenceName) as $mtomModel) {
+                foreach ($model->ref($referenceName) as $mtomModel) {
                     $mtomModel->delete();
                 }
             }
@@ -138,15 +142,18 @@ trait ModelWithMToMTrait
     /**
      *
      */
-    protected function getOtherModelRecord($otherModel, MToMModel $mToMModel): Model {
+    protected function getOtherModelRecord($otherModel, MToMModel $mToMModel): Model
+    {
         $otherModelClass = $mToMModel->getOtherModelClass($this);
-        if(is_object($otherModel)) {
+        if (is_object($otherModel)) {
             //only check if its a model of the correct class; also check if accidently $this was passed
-            if(get_class($otherModel) !== $otherModelClass) {
-                throw new Exception('Object of wrong class was passed: ' . $mToMModel->getOtherModelClass($this) . 'expected, ' . get_class($otherModel) . ' passed.');
+            if (get_class($otherModel) !== $otherModelClass) {
+                throw new Exception(
+                    'Object of wrong class was passed: ' . $mToMModel->getOtherModelClass($this)
+                    . 'expected, ' . get_class($otherModel) . ' passed.'
+                );
             }
-        }
-        else {
+        } else {
             $id = $otherModel;
             $otherModel = new $otherModelClass($this->persistence);
             $otherModel->tryLoad($id);

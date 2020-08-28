@@ -7,15 +7,6 @@ on:
     branches: '**'
 
 jobs:
-  checkforforgottenvardumps:
-    runs-on: ubuntu-latest
-    name: Test for forgotten var_dumps in code
-    steps:
-      - name: Check for var_dumps
-        id: check1
-        uses: umutphp/php-var-dump-check-action@v1
-
-
   phpinsights:
     name: PHP-Insights
     runs-on: ubuntu-latest
