@@ -32,27 +32,27 @@ class MToMModelTest extends TestCase {
     /**
      *
      */
-    public function testExceptionMoreThanTwoElementsInFieldNamesForLinkedClasses() {
+    public function testExceptionMoreThanTwoElementsInFieldNamesForReferencedClasses() {
         $persistence = new Persistence\Array_();
         $someClassWith3Elements = new class() extends MToMModel {
-            public $fieldNamesForLinkedClasses = [
+            protected $fieldNamesForReferencedClasses = [
                 'field1' => 'Blabla',
                 'field2' => 'DaDa',
                 'field3' => 'Gaga'
             ];
         };
         self::expectException(Exception::class);
-        $instance = new $someClassWith3Elements($persistence);
+        new $someClassWith3Elements($persistence);
     }
 
 
     /**
      *
      */
-    public function testExceptionLessThanTwoElementsInFieldNamesForLinkedClasses() {
+    public function testExceptionLessThanTwoElementsInFieldNamesForReferencedClasses() {
         $persistence = new Persistence\Array_();
         $someClassWith1Element = new class() extends MToMModel {
-            public $fieldNamesForLinkedClasses = [
+            protected $fieldNamesForReferencedClasses = [
                 'field1' => 'Blabla'
             ];
         };
@@ -64,10 +64,10 @@ class MToMModelTest extends TestCase {
     /**
      *
      */
-    public function testExceptionInvalidClassInFieldNamesForLinkedClasses() {
+    public function testExceptionInvalidClassInFieldNamesForReferencedClasses() {
         $persistence = new Persistence\Array_();
         $someClassWithInvalidClassDefinition = new class() extends MToMModel {
-            public $fieldNamesForLinkedClasses = [
+            protected $fieldNamesForReferencedClasses = [
                 'field1' => Student::class,
                 'field2' => 'SomeNonExistantModel'
             ];

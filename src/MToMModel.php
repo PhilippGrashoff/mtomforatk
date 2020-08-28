@@ -17,7 +17,7 @@ abstract class MToMModel extends Model
     //         'student_id' => Student::class,
     //         'lesson_id' => Lesson::class
     //     ]
-    public $fieldNamesForLinkedClasses = [];
+    protected $fieldNamesForReferencedClasses = [];
 
     //array containing instances of the two linked models. Useful for re-using them and saving DB requests
     protected $referenceObjects = [];
@@ -29,17 +29,17 @@ abstract class MToMModel extends Model
     public function init(): void
     {
         parent::init();
-        if(count($this->fieldNamesForLinkedClasses) !== 2) {
-            throw new Exception('2 Fields and corresponding classes need to be defined in $fieldNamesForLinkedClasses array');
+        if(count($this->fieldNamesForReferencedClasses) !== 2) {
+            throw new Exception('2 Fields and corresponding classes need to be defined in fieldNamesForReferencedClasses array');
         }
         if(
-            !class_exists(reset($this->fieldNamesForLinkedClasses))
-            || !class_exists(end($this->fieldNamesForLinkedClasses))
+            !class_exists(reset($this->fieldNamesForReferencedClasses))
+            || !class_exists(end($this->fieldNamesForReferencedClasses))
         ) {
-            throw new Exception('Non existant Class defined in $fieldNamesForLinkedClasses array');
+            throw new Exception('Non existant Class defined in fieldNamesForReferencedClasses array');
         }
 
-        foreach($this->fieldNamesForLinkedClasses as $fieldName => $className) {
+        foreach($this->fieldNamesForReferencedClasses as $fieldName => $className) {
             $this->hasOne($fieldName, [$className]);
             $this->referenceObjects[$className] = null;
         }
@@ -57,7 +57,7 @@ abstract class MToMModel extends Model
         //load if necessary
         if(!$this->referenceObjects[$className] instanceof Model) {
             $this->referenceObjects[$className] = new $className($this->persistence);
-            $this->referenceObjects[$className]->load($this->get(array_search($className, $this->fieldNamesForLinkedClasses)));
+            $this->referenceObjects[$className]->load($this->get(array_search($className, $this->fieldNamesForReferencedClasses)));
         }
 
         return $this->referenceObjects[$className];
@@ -81,9 +81,9 @@ abstract class MToMModel extends Model
      *
      */
     public function getFieldNameForModel(Model $model): string {
-        $fieldName = array_search(get_class($model), $this->fieldNamesForLinkedClasses);
+        $fieldName = array_search(get_class($model), $this->fieldNamesForReferencedClasses);
         if(!$fieldName) {
-            throw new Exception('No field name defined in ' . __CLASS__ . '->fieldNamesForLinkedClasses for Class ' . get_class($model));
+            throw new Exception('No field name defined in ' . __CLASS__ . '->fieldNamesForReferencedClasses for Class ' . get_class($model));
         }
 
         return $fieldName;
@@ -96,14 +96,14 @@ abstract class MToMModel extends Model
      */
     public function getOtherModelClass(Model $model): string {
         $modelClass = get_class($model);
-        if(!in_array($modelClass, $this->fieldNamesForLinkedClasses)) {
-            throw new Exception('Class ' . $modelClass . 'not found in fieldNamesForLinkedClasses');
+        if(!in_array($modelClass, $this->fieldNamesForReferencedClasses)) {
+            throw new Exception('Class ' . $modelClass . 'not found in fieldNamesForReferencedClasses');
         }
 
         //as array has 2 elements, return second if passed class is the first, else otherwise
-        if(reset($this->fieldNamesForLinkedClasses) === $modelClass) {
-            return end($this->fieldNamesForLinkedClasses);
+        if(reset($this->fieldNamesForReferencedClasses) === $modelClass) {
+            return end($this->fieldNamesForReferencedClasses);
         }
-        return reset($this->fieldNamesForLinkedClasses);
+        return reset($this->fieldNamesForReferencedClasses);
     }
 }
