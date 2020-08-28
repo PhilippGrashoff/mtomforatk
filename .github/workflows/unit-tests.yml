@@ -44,4 +44,8 @@ jobs:
 
       - name: "Run tests"
         if: matrix.type == 'Phpunit'
-        run: vendor/bin/phpunit tests --coverage-text -v
+        run: vendor/bin/phpunit tests --whitelist src --coverage-clover tests/coverage.xml -v
+        
+      - name: Codecov
+        uses: codecov/codecov-action@v1
+
