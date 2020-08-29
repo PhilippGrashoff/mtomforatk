@@ -16,20 +16,20 @@ After setting these classes up using this project, MToM operations can be done e
 $teacher = new Teacher($app->db);
 $teacher->save();
 
-//Add Lesson by its ID
-$teacherToLesson = $teacher->addMToMRelation(TeacherToLesson::class, 1); //creates a new TeacherToLesson record
-$lessonWithId1 = $teacherToLesson->getObject(Lesson::class); //easy way to get Lesson object. No extra DB query is used.
+//Add Lesson by its ID, in this case 123
+$teacherToLesson = $teacher->addMToMRelation(new TeacherToLesson($app->db), 123); //creates a new TeacherToLesson record
+$lessonWithId123 = $teacherToLesson->getObject(Lesson::class); //easy way to get Lesson object. No extra DB query is used.
 //remove lesson by its ID
-$teacher->removeMToMRelation(TeacherToLesson::class, 1); //removes the TeacherToLesson record
+$teacher->removeMToMRelation(new TeacherToLesson($app->db), 123); //removes the TeacherToLesson record
 
 //Add a lesson by passing the object
 $lesson = new Lesson($app->db);
 $lesson->save();
-$teacher->addMToMRelation(TeacherToLesson::class, $lesson);
-$teacher->hasMToMRelation(TeacherToLesson::class, $lesson); //true
+$teacher->addMToMRelation(new TeacherToLesson($app->db), $lesson);
+$teacher->hasMToMRelation(new TeacherToLesson($app->db), $lesson); //true
 //remove a lesson by passing object
-$teacher->removeMToMRelation(TeacherToLesson::class, $lesson);
-$teacher->hasMToMRelation(TeacherToLesson::class, $lesson); //true
+$teacher->removeMToMRelation(new TeacherToLesson($app->db), $lesson);
+$teacher->hasMToMRelation(new TeacherToLesson($app->db), $lesson); //true
 ```
 
 If you want even more comfort, implement some wrapper functions which further shorten the code.
