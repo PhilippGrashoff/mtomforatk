@@ -5,29 +5,43 @@ An addition to atk4/data to easily manage Many To Many (MToM) Relations. The pur
 is to write as little code as possible for actual MToM operations.
 
 ## Example code
-As Example, lets use Students and Lessons. A Student can have many Lessons, a Lesson can have many Students.
+As Example, lets use Students and Lessons. A Teacher can have many Lessons, a Lesson can have many Teachers.
 To map this MToM relationship, 3 classes are created:
-* Student
+* Teacher
 * Lesson
-* StudentToLesson
+* TeacherToLesson
 
 After setting these classes up using this project, MToM operations can be done easily:
 ```
-$student = new Student($app->db);
-$student->save();
+$teacher = new Teacher($app->db);
+$teacher->save();
 
 //Add Lesson by its ID
-$studentToLesson = $student->addLesson(1); //creates a new StudentToLesson record
-$lessonWithId1 = $studentToLesson->getObject(Lesson::class); //easy way to get Lesson object. No extra DB query is used.
+$teacherToLesson = $teacher->addMToMRelation(TeacherToLesson::class, 1); //creates a new TeacherToLesson record
+$lessonWithId1 = $teacherToLesson->getObject(Lesson::class); //easy way to get Lesson object. No extra DB query is used.
 //remove lesson by its ID
-$student->removeLesson(1); //removes the StudentToLesson record
+$teacher->removeMToMRelation(TeacherToLesson::class, 1); //removes the TeacherToLesson record
 
 //Add a lesson by passing the object
 $lesson = new Lesson($app->db);
 $lesson->save();
+$teacher->addMToMRelation(TeacherToLesson::class, $lesson);
+$teacher->hasMToMRelation(TeacherToLesson::class, $lesson); //true
+//remove a lesson by passing object
+$teacher->removeMToMRelation(TeacherToLesson::class, $lesson);
+$teacher->hasMToMRelation(TeacherToLesson::class, $lesson); //true
+```
+
+If you want even more comfort, implement some wrapper functions which further shorten the code.
+As Example, another MToMRelation is set up in test/testmodels: StudentToLesson. A Student can
+have many Lessons, a Lesson can have many Students:
+* Student
+* StudentToLesson
+
+See Student where addLesson(), removeLesson() and hasLessonRelation() wrapper functions are implemented:
+```
 $student->addLesson($lesson);
 $student->hasLessonRelation($lesson); //true
-//remove a lesson by passing object
 $student->removeLession($lesson);
 $student->hasLessonRelation($lesson); //false
 ```

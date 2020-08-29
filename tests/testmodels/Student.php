@@ -10,7 +10,6 @@ use mtomforatk\ModelWithMToMTrait;
  */
 class Student extends Model
 {
-
     use ModelWithMToMTrait;
 
     public $table = 'student';
@@ -25,14 +24,14 @@ class Student extends Model
     }
 
     public function addLesson($lesson, array $additionalFields = []) {
-        return $this->addMToMRelation($lesson, new StudentToLesson($this->persistence), $additionalFields);
+        return $this->addMToMRelation(new StudentToLesson($this->persistence), $lesson, $additionalFields);
     }
 
     public function removeLesson($lesson) {
-        return $this->removeMToMRelation($lesson, new StudentToLesson($this->persistence));
+        return $this->removeMToMRelation(new StudentToLesson($this->persistence), $lesson);
     }
 
     public function hasLessonRelation($lesson) {
-        return $this->hasMToMRelation($lesson, new StudentToLesson($this->persistence));
+        return $this->hasMToMRelation(new StudentToLesson($this->persistence), $lesson);
     }
 }

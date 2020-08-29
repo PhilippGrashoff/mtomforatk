@@ -17,16 +17,11 @@ trait ModelWithMToMTrait
      * Create a new MToM relation, e.g. a new StudentToLesson record. Called from either Student or Lesson class.
      * First checks if record does exist already, and only then adds new relation.
      */
-    protected function addMToMRelation(
-        $otherModel,
-        MToMModel $mToMModel,
-        array $additionalFields = []
-    ): MToMModel {
+    public function addMToMRelation(MToMModel $mToMModel, $otherModel, array $additionalFields = []): MToMModel
+    {
         //$this needs to be loaded to get ID
         $this->checkThisIsLoaded();
-
         $otherModel = $this->getOtherModelRecord($otherModel, $mToMModel);
-
         //check if reference already exists, if so update existing record only
         $mToMModel->addConditionForModel($this);
         $mToMModel->addConditionForModel($otherModel);
@@ -56,17 +51,15 @@ trait ModelWithMToMTrait
      * function used to remove a MToMModel record like StudentToLesson. Either used from Student or Lesson class.
      * GuestToGroup etc.
      */
-    protected function removeMToMRelation(
-        $otherModel,
-        MToMModel $mToMModel
-    ): MToMModel {
+    public function removeMToMRelation(MToMModel $mToMModel, $otherModel): MToMModel
+    {
         //$this needs to be loaded to get ID
         $this->checkThisIsLoaded();
-
         $otherModel = $this->getOtherModelRecord($otherModel, $mToMModel);
 
         $mToMModel->addConditionForModel($this);
         $mToMModel->addConditionForModel($otherModel);
+        //loadAny as it will throw exception when record is not found
         $mToMModel->loadAny();
         $mToMModel->delete();
 
@@ -78,12 +71,9 @@ trait ModelWithMToMTrait
      * checks if a MtoM reference to the given object exists or not, e.g. if a StudentToLesson record exists for a
      * specific student and lesson
      */
-    protected function hasMToMRelation(
-        $otherModel,
-        MToMModel $mToMModel
-    ): bool {
+    public function hasMToMRelation(MToMModel $mToMModel, $otherModel): bool
+    {
         $this->checkThisIsLoaded();
-
         $otherModel = $this->getOtherModelRecord($otherModel, $mToMModel);
 
         $mToMModel->addConditionForModel($this);

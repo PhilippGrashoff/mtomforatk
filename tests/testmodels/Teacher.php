@@ -8,11 +8,11 @@ use mtomforatk\ModelWithMToMTrait;
 /**
  *
  */
-class Lesson extends Model
+class Teacher extends Model
 {
     use ModelWithMToMTrait;
 
-    public $table = 'lesson';
+    public $table = 'teacher';
 
 
     public function init(): void {
@@ -20,7 +20,6 @@ class Lesson extends Model
 
         $this->addField('name');
 
-        $this->addMToMReferenceAndDeleteHook(StudentToLesson::class);
         $this->addMToMReferenceAndDeleteHook(TeacherToLesson::class);
     }
 }
