@@ -30,7 +30,7 @@ abstract class MToMModel extends Model
      * check if $fieldNamesForReferencedClasses content is valid.
      * Create hasOne References to both linked classes.
      */
-    public function init(): void
+    protected function init(): void
     {
         parent::init();
         //make sure 2 classes to link are defined

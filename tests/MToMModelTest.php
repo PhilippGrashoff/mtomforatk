@@ -3,23 +3,25 @@
 namespace mtomforatk\tests;
 
 use atk4\data\Exception;
-use atk4\core\AtkPhpunit\TestCase;
+use traitsforatkdata\TestCase;
 use mtomforatk\MToMModel;
 use mtomforatk\tests\testmodels\Lesson;
 use mtomforatk\tests\testmodels\StudentToLesson;
 use mtomforatk\tests\testmodels\Student;
-use mtomforatk\tests\testmodels\Persistence;
 use atk4\data\Model;
 
-/**
- *
- */
+
 class MToMModelTest extends TestCase
 {
+    protected $sqlitePersistenceModels = [
+        Student::class,
+        StudentToLesson::class,
+        Lesson::class
+    ];
 
     public function testInit()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $studentToLesson = new StudentToLesson($persistence);
         self::assertTrue($studentToLesson->hasField('student_id'));
         self::assertTrue($studentToLesson->hasField('lesson_id'));
@@ -29,7 +31,7 @@ class MToMModelTest extends TestCase
 
     public function testExceptionMoreThanTwoElementsInFieldNamesForReferencedClasses()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $someClassWith3Elements = new class() extends MToMModel {
             protected $fieldNamesForReferencedClasses = [
                 'field1' => 'Blabla',
@@ -43,7 +45,7 @@ class MToMModelTest extends TestCase
 
     public function testExceptionLessThanTwoElementsInFieldNamesForReferencedClasses()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $someClassWith1Element = new class() extends MToMModel {
             protected $fieldNamesForReferencedClasses = [
                 'field1' => 'Blabla'
@@ -55,7 +57,7 @@ class MToMModelTest extends TestCase
 
     public function testExceptionInvalidClassInFieldNamesForReferencedClasses()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $someClassWithInvalidClassDefinition = new class() extends MToMModel {
             protected $fieldNamesForReferencedClasses = [
                 'field1' => Student::class,
@@ -68,7 +70,7 @@ class MToMModelTest extends TestCase
 
     public function testReferenceObjectKeysCreatedInArray()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $studentToLesson = new StudentToLesson($persistence);
         $referenceObjects = (new \ReflectionClass($studentToLesson))->getProperty('referenceObjects');
         $referenceObjects->setAccessible(true);
@@ -80,7 +82,7 @@ class MToMModelTest extends TestCase
 
     public function testAddLoadedObject()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $student->save();
         $studentToLesson = new StudentToLesson($persistence);
@@ -98,7 +100,7 @@ class MToMModelTest extends TestCase
 
     public function testAddLoadedObjectExceptionWrongClassPassed()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $otherClass = new class() extends Model {
             public $table = 'sometable';
         };
@@ -110,7 +112,7 @@ class MToMModelTest extends TestCase
 
     public function testgetObject()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $student->save();
@@ -132,7 +134,7 @@ class MToMModelTest extends TestCase
 
     public function testgetObjectExceptionInvalidClass()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $studentToLesson = new StudentToLesson($persistence);
         self::expectException(Exception::class);
         $resA = $studentToLesson->getObject('SomeNonSetClass');
@@ -140,7 +142,7 @@ class MToMModelTest extends TestCase
 
     public function testgetFieldNameForModel()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $studentToLesson = new StudentToLesson($persistence);
         self::assertSame('student_id', $studentToLesson->getFieldNameForModel(new Student($persistence)));
         self::assertSame('lesson_id', $studentToLesson->getFieldNameForModel(new Lesson($persistence)));
@@ -148,7 +150,7 @@ class MToMModelTest extends TestCase
 
     public function testgetFieldNameForModelExceptionWrongClass()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $studentToLesson = new StudentToLesson($persistence);
         self::expectException(Exception::class);
         $studentToLesson->getFieldNameForModel(new StudentToLesson($persistence));
@@ -156,7 +158,7 @@ class MToMModelTest extends TestCase
 
     public function testGetOtherModelClass()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $studentToLesson = new StudentToLesson($persistence);
         self::assertSame(Lesson::class, $studentToLesson->getOtherModelClass(new Student($persistence)));
         self::assertSame(Student::class, $studentToLesson->getOtherModelClass(new Lesson($persistence)));
@@ -164,7 +166,7 @@ class MToMModelTest extends TestCase
 
     public function testGetOtherModelClassExceptionWrongClass()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $studentToLesson = new StudentToLesson($persistence);
         self::expectException(Exception::class);
         $studentToLesson->getOtherModelClass(new StudentToLesson($persistence));
@@ -172,23 +174,29 @@ class MToMModelTest extends TestCase
 
     public function testAddConditionForModel()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $lesson = new Lesson($persistence);
         $lesson->set('id', 234);
+        $lesson->save();
         $student = new Student($persistence);
         $student->set('id', 456);
+        $student->save();
+
+        $student->addMToMRelation((new StudentToLesson($persistence)), $lesson);
+
         $studentToLesson = new StudentToLesson($persistence);
         $studentToLesson->addConditionForModel($lesson);
         $studentToLesson->addConditionForModel($student);
 
-        $this->assertCount(2, $studentToLesson->conditions);
-        $this->assertSame(
-            ['lesson_id', 234],
-            $studentToLesson->conditions[0]
+        $studentToLesson->loadAny();
+        self::assertEquals(
+            234,
+            $studentToLesson->get('lesson_id')
         );
-        $this->assertSame(
-            ['student_id', 456],
-            $studentToLesson->conditions[1]
+        self::assertEquals(
+            456,
+            $studentToLesson->get('student_id')
         );
+
     }
 }

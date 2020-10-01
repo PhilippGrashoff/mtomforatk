@@ -15,7 +15,7 @@ class Student extends Model
     public $table = 'student';
 
 
-    public function init(): void {
+    protected function init(): void {
         parent::init();
 
         $this->addField('name');

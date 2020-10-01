@@ -6,8 +6,7 @@ namespace mtomforatk\tests;
 use mtomforatk\tests\testmodels\Lesson;
 use mtomforatk\tests\testmodels\Student;
 use mtomforatk\tests\testmodels\StudentToLesson;
-use atk4\core\AtkPhpunit\TestCase;
-use mtomforatk\tests\testmodels\Persistence;
+use traitsforatkdata\TestCase;
 use atk4\data\Exception;
 
 /**
@@ -15,11 +14,17 @@ use atk4\data\Exception;
  * @package PMRAtk\tests\phpunit\Data\Traits
  */
 class ModelWithMtoMTraitTest extends TestCase
-{
+{   
+
+    protected $sqlitePersistenceModels = [
+        StudentToLesson::class,
+        Student::class,
+        Lesson::class
+    ];
 
     public function testMToMAdding()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $student->save();
@@ -36,7 +41,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testMToMAddingThrowExceptionThisNotLoaded()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $lesson->save();
@@ -47,7 +52,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testMToMAddingThrowExceptionObjectNotLoaded()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $student->save();
@@ -58,7 +63,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testMToMAddingById()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $student->save();
@@ -71,7 +76,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testMToMAddingByInvalidId()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $student->save();
 
@@ -81,7 +86,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testMToMRemoval()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $student->save();
@@ -100,7 +105,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testMToMRemovalThrowExceptionThisNotLoaded()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $lesson->save();
@@ -111,7 +116,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testMToMRemovalThrowExceptionObjectNotLoaded()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $student->save();
@@ -122,7 +127,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testHasMToMReference()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $student->save();
@@ -139,7 +144,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testhasMToMRelationThrowExceptionThisNotLoaded()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $lesson->save();
@@ -150,7 +155,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testhasMToMRelationThrowExceptionObjectNotLoaded()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $student->save();
@@ -161,7 +166,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testMToMAddingWrongClassException()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $student->save();
         self::expectException(Exception::class);
@@ -170,7 +175,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testMToMRemovalWrongClassException()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $student->save();
@@ -182,7 +187,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testhasMToMRelationWrongClassException()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $student->save();
@@ -194,7 +199,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testAddAdditionalFields()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $student->save();
@@ -211,7 +216,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testMToMModelIsReturned()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $student->save();
@@ -225,7 +230,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
     public function testOnAfterDeleteHookDeletesMToMModel()
     {
-        $persistence = new Persistence\Array_();
+        $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         $lesson = new Lesson($persistence);
         $student->save();

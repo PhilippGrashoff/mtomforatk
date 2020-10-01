@@ -18,7 +18,7 @@ class StudentToLesson extends MToMModel
     /**
      * only used to add an additional field to test additionalFields parameter in tests
      */
-    public function init(): void
+    protected function init(): void
     {
         parent::init();
         $this->addField('some_other_field');

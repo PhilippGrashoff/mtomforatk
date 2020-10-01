@@ -15,7 +15,7 @@ class Lesson extends Model
     public $table = 'lesson';
 
 
-    public function init(): void {
+    protected function init(): void {
         parent::init();
 
         $this->addField('name');
