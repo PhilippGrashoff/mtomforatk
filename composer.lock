@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "5da5ea803bd5c6869145efa5db0b5d3a",
+    "content-hash": "f7a3d9dd360dc0a53d01b54a5ecfbdc5",
     "packages": [
         {
             "name": "atk4/core",
-            "version": "dev-develop",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atk4/core.git",
-                "reference": "196e8a382a58c7bc075ae6cd082dc0a511812100"
+                "reference": "ed188892088b247b282610778935bccb072d61a3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atk4/core/zipball/196e8a382a58c7bc075ae6cd082dc0a511812100",
-                "reference": "196e8a382a58c7bc075ae6cd082dc0a511812100",
+                "url": "https://api.github.com/repos/atk4/core/zipball/ed188892088b247b282610778935bccb072d61a3",
+                "reference": "ed188892088b247b282610778935bccb072d61a3",
                 "shasum": ""
             },
             "require": {
@@ -72,25 +72,25 @@
                 "php",
                 "traits"
             ],
-            "time": "2020-09-21T23:00:35+00:00"
+            "time": "2020-10-06T09:10:39+00:00"
         },
         {
             "name": "atk4/data",
-            "version": "dev-develop",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atk4/data.git",
-                "reference": "a8b6ea4795926c825d744463906392aaf548d5bd"
+                "reference": "e816a9331236ae77d4e33e3eaea6b208bbef4507"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atk4/data/zipball/a8b6ea4795926c825d744463906392aaf548d5bd",
-                "reference": "a8b6ea4795926c825d744463906392aaf548d5bd",
+                "url": "https://api.github.com/repos/atk4/data/zipball/e816a9331236ae77d4e33e3eaea6b208bbef4507",
+                "reference": "e816a9331236ae77d4e33e3eaea6b208bbef4507",
                 "shasum": ""
             },
             "require": {
-                "atk4/core": "dev-develop",
-                "atk4/dsql": "dev-develop",
+                "atk4/core": "^2.3.0",
+                "atk4/dsql": "^2.3.0",
                 "ext-intl": "*",
                 "php": ">=7.3.0"
             },
@@ -98,7 +98,7 @@
                 "atk4/data": "self.version"
             },
             "require-dev": {
-                "atk4/schema": "dev-develop",
+                "atk4/schema": "^2.3.0",
                 "friendsofphp/php-cs-fixer": "^2.16",
                 "johnkary/phpunit-speedtrap": "^3.2",
                 "phpunit/phpcov": "*",
@@ -144,24 +144,24 @@
                 "query",
                 "sql"
             ],
-            "time": "2020-09-29T13:39:23+00:00"
+            "time": "2020-10-06T09:36:24+00:00"
         },
         {
             "name": "atk4/dsql",
-            "version": "dev-develop",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atk4/dsql.git",
-                "reference": "d89b6189e93ac72e678e13fdb0d8510866dd672e"
+                "reference": "4390289d51786ee7ec0e838d4ad26678db9d6052"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atk4/dsql/zipball/d89b6189e93ac72e678e13fdb0d8510866dd672e",
-                "reference": "d89b6189e93ac72e678e13fdb0d8510866dd672e",
+                "url": "https://api.github.com/repos/atk4/dsql/zipball/4390289d51786ee7ec0e838d4ad26678db9d6052",
+                "reference": "4390289d51786ee7ec0e838d4ad26678db9d6052",
                 "shasum": ""
             },
             "require": {
-                "atk4/core": "dev-develop",
+                "atk4/core": "^2.3.0",
                 "php": ">=7.3.0"
             },
             "require-dev": {
@@ -206,28 +206,24 @@
                 "orm",
                 "sql"
             ],
-            "time": "2020-09-21T19:30:41+00:00"
+            "time": "2020-10-06T09:22:49+00:00"
         },
         {
             "name": "atk4/schema",
-            "version": "dev-develop",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atk4/schema.git",
-                "reference": "75fe8ef4f526458dde70b24fe17500d304dc8728"
+                "reference": "5f5374e1e0164ca97e34dfdc37cee95f820e8762"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atk4/schema/zipball/75fe8ef4f526458dde70b24fe17500d304dc8728",
-                "reference": "75fe8ef4f526458dde70b24fe17500d304dc8728",
+                "url": "https://api.github.com/repos/atk4/schema/zipball/5f5374e1e0164ca97e34dfdc37cee95f820e8762",
+                "reference": "5f5374e1e0164ca97e34dfdc37cee95f820e8762",
                 "shasum": ""
             },
-            "require": {
-                "atk4/data": "dev-develop",
-                "php": ">=7.3.0"
-            },
             "require-dev": {
-                "atk4/ui": "dev-develop",
+                "atk4/ui": "^2.3.0",
                 "friendsofphp/php-cs-fixer": "^2.16",
                 "phpunit/phpcov": "*",
                 "phpunit/phpunit": ">=9.0"
@@ -279,25 +275,25 @@
                 "schema",
                 "sql"
             ],
-            "time": "2020-09-14T14:51:35+00:00"
+            "time": "2020-10-06T09:31:54+00:00"
         },
         {
             "name": "atk4/ui",
-            "version": "dev-develop",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atk4/ui.git",
-                "reference": "1d61faaf07baa84f55668017ce1c93182548c4bf"
+                "reference": "71086ca7e538df67457ce188c5d403a01703848f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atk4/ui/zipball/1d61faaf07baa84f55668017ce1c93182548c4bf",
-                "reference": "1d61faaf07baa84f55668017ce1c93182548c4bf",
+                "url": "https://api.github.com/repos/atk4/ui/zipball/71086ca7e538df67457ce188c5d403a01703848f",
+                "reference": "71086ca7e538df67457ce188c5d403a01703848f",
                 "shasum": ""
             },
             "require": {
-                "atk4/core": "dev-develop",
-                "atk4/data": "dev-develop",
+                "atk4/core": "^2.3.0",
+                "atk4/data": "^2.3.0",
                 "ext-json": "*",
                 "php": ">=7.3.0"
             },
@@ -372,7 +368,7 @@
                 "web",
                 "widget"
             ],
-            "time": "2020-10-01T12:59:56+00:00"
+            "time": "2020-10-06T09:41:27+00:00"
         },
         {
             "name": "philippgrashoff/traitsforatkdata",
@@ -380,19 +376,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PhilippGrashoff/traitsforatkdata.git",
-                "reference": "ea73915270039973276a047e6536542da5535caa"
+                "reference": "a586e41e98a8c51d945a76bc2ae36f2eb831a805"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PhilippGrashoff/traitsforatkdata/zipball/ea73915270039973276a047e6536542da5535caa",
-                "reference": "ea73915270039973276a047e6536542da5535caa",
+                "url": "https://api.github.com/repos/PhilippGrashoff/traitsforatkdata/zipball/a586e41e98a8c51d945a76bc2ae36f2eb831a805",
+                "reference": "a586e41e98a8c51d945a76bc2ae36f2eb831a805",
                 "shasum": ""
             },
             "require": {
-                "atk4/core": "dev-develop",
-                "atk4/data": "dev-develop",
-                "atk4/schema": "dev-develop",
-                "atk4/ui": "dev-develop",
+                "atk4/core": "2.3.0",
+                "atk4/data": "2.3.0",
+                "atk4/schema": "2.3.0",
+                "atk4/ui": "2.3.0",
                 "ext-mbstring": "*",
                 "ext-sodium": "*"
             },
@@ -406,7 +402,7 @@
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
-            "time": "2020-10-01T16:43:47+00:00"
+            "time": "2020-10-08T18:43:32+00:00"
         },
         {
             "name": "psr/log",
@@ -698,7 +694,7 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v5.1.6",
+            "version": "v5.1.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
@@ -1231,16 +1227,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "9.1.11",
+            "version": "9.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "c9394cb9d07ecfa9351b96f2e296bad473195f4d"
+                "reference": "53a4b737e83be724efd2bc4e7b929b9a30c48972"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/c9394cb9d07ecfa9351b96f2e296bad473195f4d",
-                "reference": "c9394cb9d07ecfa9351b96f2e296bad473195f4d",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/53a4b737e83be724efd2bc4e7b929b9a30c48972",
+                "reference": "53a4b737e83be724efd2bc4e7b929b9a30c48972",
                 "shasum": ""
             },
             "require": {
@@ -1268,7 +1264,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "9.1-dev"
+                    "dev-master": "9.2-dev"
                 }
             },
             "autoload": {
@@ -1294,7 +1290,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2020-09-19T05:29:17+00:00"
+            "time": "2020-10-02T03:37:32+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -1499,16 +1495,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "9.3.11",
+            "version": "9.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "f7316ea106df7c9507f4fdaa88c47bc10a3b27a1"
+                "reference": "ef533467a7974c4b6c354f3eff42a115910bd4e5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/f7316ea106df7c9507f4fdaa88c47bc10a3b27a1",
-                "reference": "f7316ea106df7c9507f4fdaa88c47bc10a3b27a1",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/ef533467a7974c4b6c354f3eff42a115910bd4e5",
+                "reference": "ef533467a7974c4b6c354f3eff42a115910bd4e5",
                 "shasum": ""
             },
             "require": {
@@ -1524,7 +1520,7 @@
                 "phar-io/version": "^3.0.2",
                 "php": ">=7.3",
                 "phpspec/prophecy": "^1.11.1",
-                "phpunit/php-code-coverage": "^9.1.11",
+                "phpunit/php-code-coverage": "^9.2",
                 "phpunit/php-file-iterator": "^3.0.4",
                 "phpunit/php-invoker": "^3.1",
                 "phpunit/php-text-template": "^2.0.2",
@@ -1555,7 +1551,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "9.3-dev"
+                    "dev-master": "9.4-dev"
                 }
             },
             "autoload": {
@@ -1584,7 +1580,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2020-09-24T08:08:49+00:00"
+            "time": "2020-10-02T03:54:37+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -1634,16 +1630,16 @@
         },
         {
             "name": "sebastian/code-unit",
-            "version": "1.0.6",
+            "version": "1.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/code-unit.git",
-                "reference": "d3a241b6028ff9d8e97d2b6ebd4090d01f92fad8"
+                "reference": "59236be62b1bb9919e6d7f60b0b832dc05cef9ab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/code-unit/zipball/d3a241b6028ff9d8e97d2b6ebd4090d01f92fad8",
-                "reference": "d3a241b6028ff9d8e97d2b6ebd4090d01f92fad8",
+                "url": "https://api.github.com/repos/sebastianbergmann/code-unit/zipball/59236be62b1bb9919e6d7f60b0b832dc05cef9ab",
+                "reference": "59236be62b1bb9919e6d7f60b0b832dc05cef9ab",
                 "shasum": ""
             },
             "require": {
@@ -1676,7 +1672,7 @@
             ],
             "description": "Collection of value objects that represent the PHP code units",
             "homepage": "https://github.com/sebastianbergmann/code-unit",
-            "time": "2020-09-28T05:28:46+00:00"
+            "time": "2020-10-02T14:47:54+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
@@ -2303,16 +2299,16 @@
         },
         {
             "name": "sebastian/type",
-            "version": "2.2.2",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/type.git",
-                "reference": "e494dcaeb89d1458c9ccd8c819745245a1669aea"
+                "reference": "fa592377f3923946cb90bf1f6a71ba2e5f229909"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/type/zipball/e494dcaeb89d1458c9ccd8c819745245a1669aea",
-                "reference": "e494dcaeb89d1458c9ccd8c819745245a1669aea",
+                "url": "https://api.github.com/repos/sebastianbergmann/type/zipball/fa592377f3923946cb90bf1f6a71ba2e5f229909",
+                "reference": "fa592377f3923946cb90bf1f6a71ba2e5f229909",
                 "shasum": ""
             },
             "require": {
@@ -2324,7 +2320,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.2-dev"
+                    "dev-master": "2.3-dev"
                 }
             },
             "autoload": {
@@ -2345,7 +2341,7 @@
             ],
             "description": "Collection of value objects that represent the types of the PHP type system",
             "homepage": "https://github.com/sebastianbergmann/type",
-            "time": "2020-09-28T06:01:38+00:00"
+            "time": "2020-10-06T08:41:03+00:00"
         },
         {
             "name": "sebastian/version",
@@ -2483,8 +2479,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "atk4/data": 20,
-        "atk4/core": 20,
         "philippgrashoff/traitsforatkdata": 20
     },
     "prefer-stable": true,
