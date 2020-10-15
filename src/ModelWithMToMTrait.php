@@ -108,9 +108,13 @@ trait ModelWithMToMTrait
         string $referenceName = '',
         array $referenceDefaults = []
     ): Reference\HasMany {
-        //if no reference name was passed, use Class name without namespace
+        //if no reference name was passed, use Class name
         if (!$referenceName) {
-            $referenceName = (new \ReflectionClass($mtomClassName))->getShortName();
+            $referenceName = $mtomClassName;
+        }
+
+        if(!class_exists($mtomClassName)) {
+            throw new Exception('Class ' . $mtomClassName . ' not found in ' . __FUNCTION__);
         }
 
         $reference = $this->hasMany($referenceName, array_merge([$mtomClassName], $referenceDefaults));

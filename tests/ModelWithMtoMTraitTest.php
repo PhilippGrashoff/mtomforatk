@@ -3,6 +3,8 @@
 namespace mtomforatk\tests;
 
 
+use atk4\data\Model;
+use mtomforatk\ModelWithMToMTrait;
 use mtomforatk\tests\testmodels\Lesson;
 use mtomforatk\tests\testmodels\Student;
 use mtomforatk\tests\testmodels\StudentToLesson;
@@ -242,5 +244,52 @@ class ModelWithMtoMTraitTest extends TestCase
         $student->delete();
         $studentToLessonCount = (new StudentToLesson($persistence))->action('count')->getOne();
         self::assertEquals(0, $studentToLessonCount);
+    }
+
+    public function testReferenceNameDefaultsToClassName() {
+        $persistence = $this->getSqliteTestPersistence();
+        $student = new Student($persistence);
+        self::assertTrue($student->hasRef(StudentToLesson::class));
+    }
+
+    public function testExceptionInvalidClassNamePassedToReferenceCreation() {
+        $persistence = $this->getSqliteTestPersistence();
+        $class = new class() extends Model {
+
+            use ModelWithMToMTrait;
+
+            public $table = 'some_table';
+
+            protected function init(): void
+            {
+                parent::init();
+
+                $this->addMToMReferenceAndDeleteHook('SomeNonExistantClassName');
+            }
+        };
+        self::expectException(Exception::class);
+        $model = new $class($persistence);
+    }
+
+    public function testDifferentReferenceNameCanBeGiven() {
+        $persistence = $this->getSqliteTestPersistence();
+        $class = new class() extends Model {
+
+            use ModelWithMToMTrait;
+
+            public $table = 'some_table';
+
+            protected function init(): void
+            {
+                parent::init();
+
+                $this->addMToMReferenceAndDeleteHook(StudentToLesson::class, 'SomeOtherReferenceName');
+            }
+        };
+
+        $model = new $class($persistence);
+
+        self::assertFalse($model->hasRef(StudentToLesson::class));
+        self::assertTrue($model->hasRef('SomeOtherReferenceName'));
     }
 }
