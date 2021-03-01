@@ -6,9 +6,6 @@ use atk4\data\Exception;
 use atk4\data\Model;
 
 
-/**
- *
- */
 abstract class MToMModel extends Model
 {
 

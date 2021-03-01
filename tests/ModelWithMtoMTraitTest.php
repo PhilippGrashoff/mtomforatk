@@ -5,6 +5,7 @@ namespace mtomforatk\tests;
 
 use atk4\data\Model;
 use mtomforatk\ModelWithMToMTrait;
+use mtomforatk\tests\testmodels\DefaultTester;
 use mtomforatk\tests\testmodels\Lesson;
 use mtomforatk\tests\testmodels\Student;
 use mtomforatk\tests\testmodels\StudentToLesson;
@@ -250,6 +251,22 @@ class ModelWithMtoMTraitTest extends TestCase
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
         self::assertTrue($student->hasRef(StudentToLesson::class));
+    }
+
+    public function testAddMToMModelDefaults(): void {
+        $defaultTester = new DefaultTester($this->getSqliteTestPersistence(), ['mToMModelDefaults' => ['caption' => 'SomeOtherCaption']]);
+        self::assertSame(
+            'SomeOtherCaption',
+            $defaultTester->ref(StudentToLesson::class)->getModelCaption()
+        );
+    }
+
+    public function testAddReferenceDefaults(): void {
+        $defaultTester = new DefaultTester($this->getSqliteTestPersistence(), ['referenceDefaults' => ['caption' => 'SomeOtherCaption']]);
+        self::assertSame(
+            'SomeOtherCaption',
+            $defaultTester->getRef(StudentToLesson::class)->caption
+        );
     }
 
     public function testExceptionInvalidClassNamePassedToReferenceCreation() {

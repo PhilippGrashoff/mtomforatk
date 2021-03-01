@@ -5,6 +5,7 @@ namespace mtomforatk\tests\testmodels;
 use atk4\data\Model;
 use mtomforatk\MToMModel;
 
+
 class TeacherToLesson extends MToMModel
 {
     public $table = 'teacher_to_lesson';

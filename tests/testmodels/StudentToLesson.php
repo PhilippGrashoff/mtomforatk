@@ -2,7 +2,6 @@
 
 namespace mtomforatk\tests\testmodels;
 
-use atk4\data\Model;
 use mtomforatk\MToMModel;
 
 class StudentToLesson extends MToMModel

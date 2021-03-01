@@ -106,18 +106,22 @@ trait ModelWithMToMTrait
     protected function addMToMReferenceAndDeleteHook(
         string $mtomClassName,
         string $referenceName = '',
-        array $referenceDefaults = []
+        array $referenceDefaults = [],
+        array $mtomClassDefaults = []
     ): Reference\HasMany {
         //if no reference name was passed, use Class name
         if (!$referenceName) {
             $referenceName = $mtomClassName;
         }
 
-        if(!class_exists($mtomClassName)) {
+        if (!class_exists($mtomClassName)) {
             throw new Exception('Class ' . $mtomClassName . ' not found in ' . __FUNCTION__);
         }
 
-        $reference = $this->hasMany($referenceName, array_merge([$mtomClassName], $referenceDefaults));
+        $reference = $this->hasMany(
+            $referenceName,
+            array_merge([array_merge([$mtomClassName], $mtomClassDefaults)], $referenceDefaults)
+        );
         $this->onHook(
             Model::HOOK_BEFORE_DELETE,
             function ($model) use ($referenceName): void {

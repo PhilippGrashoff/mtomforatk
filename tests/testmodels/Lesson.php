@@ -5,9 +5,7 @@ namespace mtomforatk\tests\testmodels;
 use atk4\data\Model;
 use mtomforatk\ModelWithMToMTrait;
 
-/**
- *
- */
+
 class Lesson extends Model
 {
     use ModelWithMToMTrait;
