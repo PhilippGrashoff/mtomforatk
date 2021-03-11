@@ -1,23 +1,24 @@
 {
   "name": "philippgrashoff/mtomforatk",
+  "description": "",
   "minimum-stability": "dev",
   "prefer-stable": true,
-  "config":{
-    "platform":{
-      "php":"7.3"
+  "config": {
+    "platform": {
+      "php": "7.3"
     }
   },
-  "require":{
-    "atk4/data": "2.3.0",
-    "atk4/core": "2.3.0",
+  "require": {
+    "atk4/data": "2.3.6",
+    "atk4/core": "2.3.5",
     "philippgrashoff/traitsforatkdata": "dev-master"
   },
   "require-dev": {
     "phpunit/phpunit": ">8"
   },
-  "autoload":{
-    "psr-4":{
-      "mtomforatk\\":"src"
+  "autoload": {
+    "psr-4": {
+      "mtomforatk\\": "src"
     }
   },
   "autoload-dev": {
