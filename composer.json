@@ -5,12 +5,11 @@
   "prefer-stable": true,
   "config": {
     "platform": {
-      "php": "7.3"
+      "php": "7.4"
     }
   },
   "require": {
-    "atk4/data": "2.3.6",
-    "atk4/core": "2.3.5",
+    "atk4/data": "2.4.*",
     "philippgrashoff/traitsforatkdata": "dev-master"
   },
   "require-dev": {

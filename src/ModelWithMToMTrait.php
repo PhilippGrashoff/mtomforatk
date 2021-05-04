@@ -2,9 +2,9 @@
 
 namespace mtomforatk;
 
-use atk4\data\Exception;
-use atk4\data\Model;
-use atk4\data\Reference;
+use Atk4\Data\Exception;
+use Atk4\Data\Model;
+use Atk4\Data\Reference;
 
 
 /**
@@ -120,7 +120,7 @@ trait ModelWithMToMTrait
 
         $reference = $this->hasMany(
             $referenceName,
-            array_merge([array_merge([$mtomClassName], $mtomClassDefaults)], $referenceDefaults)
+            array_merge(['model' => array_merge([$mtomClassName], $mtomClassDefaults)], $referenceDefaults)
         );
         $this->onHook(
             Model::HOOK_BEFORE_DELETE,

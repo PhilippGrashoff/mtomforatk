@@ -2,8 +2,8 @@
 
 namespace mtomforatk;
 
-use atk4\data\Exception;
-use atk4\data\Model;
+use Atk4\Data\Exception;
+use Atk4\Data\Model;
 
 
 abstract class MToMModel extends Model
@@ -44,7 +44,7 @@ abstract class MToMModel extends Model
         }
 
         foreach ($this->fieldNamesForReferencedClasses as $fieldName => $className) {
-            $this->hasOne($fieldName, [$className]);
+            $this->hasOne($fieldName, ['model' => [$className]]);
             $this->referenceObjects[$className] = null;
         }
     }
