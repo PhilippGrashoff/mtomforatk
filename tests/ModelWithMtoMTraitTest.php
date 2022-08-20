@@ -3,14 +3,14 @@
 namespace mtomforatk\tests;
 
 
-use atk4\data\Model;
+use Atk4\Data\Model;
 use mtomforatk\ModelWithMToMTrait;
 use mtomforatk\tests\testmodels\DefaultTester;
 use mtomforatk\tests\testmodels\Lesson;
 use mtomforatk\tests\testmodels\Student;
 use mtomforatk\tests\testmodels\StudentToLesson;
 use traitsforatkdata\TestCase;
-use atk4\data\Exception;
+use Atk4\Data\Exception;
 
 /**
  * Class MToMTraitTest

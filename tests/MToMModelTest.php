@@ -2,13 +2,13 @@
 
 namespace mtomforatk\tests;
 
-use atk4\data\Exception;
+use Atk4\Data\Exception;
 use traitsforatkdata\TestCase;
 use mtomforatk\MToMModel;
 use mtomforatk\tests\testmodels\Lesson;
 use mtomforatk\tests\testmodels\StudentToLesson;
 use mtomforatk\tests\testmodels\Student;
-use atk4\data\Model;
+use Atk4\Data\Model;
 
 
 class MToMModelTest extends TestCase
