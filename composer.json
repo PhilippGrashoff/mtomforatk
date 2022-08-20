@@ -10,7 +10,7 @@
   },
   "require": {
     "atk4/data": "2.4.*",
-    "philippgrashoff/traitsforatkdata": "dev-master"
+    "philippgrashoff/traitsforatkdata": "2.4.*"
   },
   "require-dev": {
     "phpunit/phpunit": ">8"
