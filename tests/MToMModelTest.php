@@ -3,17 +3,17 @@
 namespace mtomforatk\tests;
 
 use Atk4\Data\Exception;
-use traitsforatkdata\TestCase;
+use Atk4\Data\Model;
+use atkextendedtestcase\TestCase;
 use mtomforatk\MToMModel;
 use mtomforatk\tests\testmodels\Lesson;
-use mtomforatk\tests\testmodels\StudentToLesson;
 use mtomforatk\tests\testmodels\Student;
-use Atk4\Data\Model;
+use mtomforatk\tests\testmodels\StudentToLesson;
 
 
 class MToMModelTest extends TestCase
 {
-    protected $sqlitePersistenceModels = [
+    protected array $sqlitePersistenceModels = [
         Student::class,
         StudentToLesson::class,
         Lesson::class

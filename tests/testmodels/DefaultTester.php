@@ -12,8 +12,8 @@ class DefaultTester extends Model
 
     public $table = 'student';
 
-    protected $referenceDefaults = [];
-    protected $mToMModelDefaults = [];
+    protected array $referenceDefaults = [];
+    protected array $mToMModelDefaults = [];
 
 
     protected function init(): void {

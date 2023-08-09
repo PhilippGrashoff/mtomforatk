@@ -27,8 +27,11 @@ abstract class MToMModel extends Model
 
 
     /**
-     * check if $fieldNamesForReferencedClasses content is valid.
-     * Create hasOne References to both linked classes.
+     *  check if $fieldNamesForReferencedClasses content is valid.
+     *  Create hasOne References to both linked classes.
+     *
+     * @return void
+     * @throws Exception
      */
     protected function init(): void
     {
@@ -55,13 +58,13 @@ abstract class MToMModel extends Model
 
 
     /**
-     *
      *  Shortcut to get a record from each of the linked classes. e.g.
      *  $studentToLesson = $student->addLesson(4); //add Lesson by ID, no lesson object yet
      *  $lesson = $studentToLesson->getObject(Lesson::class); //will return Lesson record with ID 4
      *
      * @param string $className
      * @return Model|null
+     * @throws Exception
      */
     public function getReferenceEntity(string $className): ?Model
     {
@@ -87,6 +90,7 @@ abstract class MToMModel extends Model
      *
      * @param Model $model
      * @return void
+     * @throws Exception
      */
 
     public function addReferenceEntity(Model $model): void
@@ -105,6 +109,7 @@ abstract class MToMModel extends Model
      *
      * @param Model $model
      * @return string
+     * @throws Exception
      */
     public function getFieldNameForModel(Model $model): string
     {
@@ -124,6 +129,7 @@ abstract class MToMModel extends Model
      *
      * @param Model $model
      * @return void
+     * @throws Exception
      */
     public function addConditionForModel(Model $model): void
     {
@@ -137,6 +143,7 @@ abstract class MToMModel extends Model
      *
      * @param Model $model
      * @return string
+     * @throws Exception
      */
     public function getOtherModelClass(Model $model): string
     {
