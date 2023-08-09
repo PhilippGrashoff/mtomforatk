@@ -86,7 +86,7 @@ class MToMModelTest extends TestCase
         $student = new Student($persistence);
         $student->save();
         $studentToLesson = new StudentToLesson($persistence);
-        $studentToLesson->addLoadedObject($student);
+        $studentToLesson->addReferenceEntity($student);
         $props = (new \ReflectionClass($studentToLesson))->getProperty(
             'referenceObjects'
         );//getProperties(\ReflectionProperty::IS_PROTECTED);
@@ -107,7 +107,7 @@ class MToMModelTest extends TestCase
         $model = new $otherClass($persistence);
         $studentToLesson = new StudentToLesson($persistence);
         self::expectException(Exception::class);
-        $studentToLesson->addLoadedObject($model);
+        $studentToLesson->addReferenceEntity($model);
     }
 
     public function testgetObject()
@@ -121,14 +121,14 @@ class MToMModelTest extends TestCase
 
         //gets loaded from DB
         $studentToLesson->set('student_id', $student->get('id'));
-        $resA = $studentToLesson->getObject(Student::class);
+        $resA = $studentToLesson->getReferenceEntity(Student::class);
         //different Object but same ID
         self::assertNotSame($student, $resA);
         self::assertSame($student->get('id'), $resA->get('id'));
 
         //is put in referenceObjects Array, should return same object
-        $studentToLesson->addLoadedObject($lesson);
-        $resB = $studentToLesson->getObject(Lesson::class);
+        $studentToLesson->addReferenceEntity($lesson);
+        $resB = $studentToLesson->getReferenceEntity(Lesson::class);
         self::assertSame($lesson, $resB);
     }
 
@@ -137,7 +137,7 @@ class MToMModelTest extends TestCase
         $persistence = $this->getSqliteTestPersistence();
         $studentToLesson = new StudentToLesson($persistence);
         self::expectException(Exception::class);
-        $resA = $studentToLesson->getObject('SomeNonSetClass');
+        $resA = $studentToLesson->getReferenceEntity('SomeNonSetClass');
     }
 
     public function testgetFieldNameForModel()

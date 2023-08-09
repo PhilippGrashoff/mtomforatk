@@ -2,26 +2,32 @@
 
 namespace mtomforatk;
 
-use Atk4\Data\Exception;
 use Atk4\Data\Model;
 use Atk4\Data\Reference;
 
 
 /**
- * Trait MToMTrait
+ * @extends Model<Model>
  */
 trait ModelWithMToMTrait
 {
 
     /**
-     * Create a new MToM relation, e.g. a new StudentToLesson record. Called from either Student or Lesson class.
-     * First checks if record does exist already, and only then adds new relation.
+     *  Create a new MToM relation, e.g. a new StudentToLesson record. Called from either Student or Lesson class.
+     *  First checks if record does exist already, and only then adds new relation.
+     *
+     * @param MToMModel $mToMModel
+     * @param $otherModel
+     * @param array<string,mixed> $additionalFields
+     * @return MToMModel
+     * @throws \Atk4\Data\Exception
+     * @throws \Atk4\Core\Exception
      */
     public function addMToMRelation(MToMModel $mToMModel, $otherModel, array $additionalFields = []): MToMModel
     {
         //$this needs to be loaded to get ID
-        $this->checkThisIsLoaded();
-        $otherModel = $this->getOtherModelRecord($otherModel, $mToMModel);
+        $this->assertIsLoaded();
+        $otherModel = $this->getOtherEntity($otherModel, $mToMModel);
         //check if reference already exists, if so update existing record only
         $mToMModel->addConditionForModel($this);
         $mToMModel->addConditionForModel($otherModel);
@@ -40,22 +46,26 @@ trait ModelWithMToMTrait
         $mToMModel->reload_after_save = false;
         //if that record already exists mysql will throw an error if unique index is set, catch here
         $mToMModel->save();
-        $mToMModel->addLoadedObject($this);
-        $mToMModel->addLoadedObject($otherModel);
+        $mToMModel->addReferenceEntity($this);
+        $mToMModel->addReferenceEntity($otherModel);
 
         return $mToMModel;
     }
 
 
     /**
-     * function used to remove a MToMModel record like StudentToLesson. Either used from Student or Lesson class.
-     * GuestToGroup etc.
+     *  method used to remove a MToMModel record like StudentToLesson. Either used from Student or Lesson class.
+     *  GuestToGroup etc.
+     *
+     * @param MToMModel $mToMModel
+     * @param $otherModel
+     * @return MToMModel
      */
     public function removeMToMRelation(MToMModel $mToMModel, $otherModel): MToMModel
     {
         //$this needs to be loaded to get ID
-        $this->checkThisIsLoaded();
-        $otherModel = $this->getOtherModelRecord($otherModel, $mToMModel);
+        $this->assertIsLoaded();
+        $otherModel = $this->getOtherEntity($otherModel, $mToMModel);
 
         $mToMModel->addConditionForModel($this);
         $mToMModel->addConditionForModel($otherModel);
@@ -70,11 +80,15 @@ trait ModelWithMToMTrait
     /**
      * checks if a MtoM reference to the given object exists or not, e.g. if a StudentToLesson record exists for a
      * specific student and lesson
+     *
+     * @param MToMModel $mToMModel
+     * @param $otherModel
+     * @return bool
      */
     public function hasMToMRelation(MToMModel $mToMModel, $otherModel): bool
     {
-        $this->checkThisIsLoaded();
-        $otherModel = $this->getOtherModelRecord($otherModel, $mToMModel);
+        $this->assertIsLoaded();
+        $otherModel = $this->getOtherEntity($otherModel, $mToMModel);
 
         $mToMModel->addConditionForModel($this);
         $mToMModel->addConditionForModel($otherModel);
@@ -83,25 +97,17 @@ trait ModelWithMToMTrait
         return $mToMModel->loaded();
     }
 
-
-    /**
-     * In each MToM operation, $this needs to be loaded to pull id. This function throws an exception if its not.
-     */
-    protected function checkThisIsLoaded(): void
-    {
-        if (!$this->loaded()) {
-            throw new Exception(
-                '$this needs to be loaded in ' . debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function']
-            );
-        }
-    }
-
-
     /**
      * 1) adds HasMany Reference to intermediate model.
      * 2) adds after delete hook which deletes any intermediate model linked to the deleted "main" model.
-     *    This way, no outdated intermediate models exist.
+     * This way, no outdated intermediate models exist.
      * Returns HasMany reference for further modifying reference if needed.
+     *
+     * @param string $mtomClassName
+     * @param string $referenceName
+     * @param array $referenceDefaults
+     * @param array $mtomClassDefaults
+     * @return Reference\HasMany
      */
     protected function addMToMReferenceAndDeleteHook(
         string $mtomClassName,
@@ -136,15 +142,19 @@ trait ModelWithMToMTrait
 
 
     /**
-     * Used to load the other model if only Id was passed.
+     * Used to load the other model if only ID was passed.
      * Make sure passed model is of the correct class.
      * Check other model is loaded so id can be gotten.
+     *
+     * @param $otherModel
+     * @param MToMModel $mToMModel
+     * @return Model
      */
-    protected function getOtherModelRecord($otherModel, MToMModel $mToMModel): Model
+    protected function getOtherEntity($otherModel, MToMModel $mToMModel): Model
     {
         $otherModelClass = $mToMModel->getOtherModelClass($this);
         if (is_object($otherModel)) {
-            //only check if its a model of the correct class; also check if accidently $this was passed
+            //only check if it's a model of the correct class; also check if accidentally $this was passed
             if (get_class($otherModel) !== $otherModelClass) {
                 throw new Exception(
                     'Object of wrong class was passed: ' . $mToMModel->getOtherModelClass($this)

@@ -10,17 +10,20 @@ abstract class MToMModel extends Model
 {
 
     /**
-     * array with 2 keys and 2 values. Set these four strings child classes.
+     * @param array<string,string> $fieldNamesForReferencedClasses
+     * with 2 keys and 2 values. Set these four strings child classes.
      * Will be used to create hasOne Reference Fields in init()
      * e.g. [
      *          'student_id' => Student::class,
      *          'lesson_id' => Lesson::class
      *      ]
      */
-    protected $fieldNamesForReferencedClasses = [];
+    protected array $fieldNamesForReferencedClasses = [];
 
-    //array containing instances of the two linked models. Useful for re-using them and saving DB requests
-    protected $referenceObjects = [];
+    /**
+     * @param array<class-string,Model> $referenceObjects containing instances of the two linked models. Useful for re-using them and saving DB requests
+     */
+    protected array $referenceObjects = [];
 
 
     /**
@@ -44,6 +47,7 @@ abstract class MToMModel extends Model
         }
 
         foreach ($this->fieldNamesForReferencedClasses as $fieldName => $className) {
+            /** @var class-string $className */
             $this->hasOne($fieldName, ['model' => [$className]]);
             $this->referenceObjects[$className] = null;
         }
@@ -51,11 +55,15 @@ abstract class MToMModel extends Model
 
 
     /**
-     * Shortcut to get a record from each of the linked classes. e.g.
-     * $studentToLesson = $student->addLesson(4); //add Lesson by id, no lesson object yet
-     * $lesson = $studentToLesson->getObject(Lesson::class); //will return Lesson record with Id 4
+     *
+     *  Shortcut to get a record from each of the linked classes. e.g.
+     *  $studentToLesson = $student->addLesson(4); //add Lesson by ID, no lesson object yet
+     *  $lesson = $studentToLesson->getObject(Lesson::class); //will return Lesson record with ID 4
+     *
+     * @param string $className
+     * @return Model|null
      */
-    public function getObject(string $className): ?Model
+    public function getReferenceEntity(string $className): ?Model
     {
         if (!array_key_exists($className, $this->referenceObjects)) {
             throw new Exception('Invalid className passed in ' . __FUNCTION__);
@@ -75,9 +83,13 @@ abstract class MToMModel extends Model
 
 
     /**
-     * used by ModelWithMToMTrait to make records available in getObject() without extra DB request
+     *  used by ModelWithMToMTrait to make records available in getObject() without extra DB request
+     *
+     * @param Model $model
+     * @return void
      */
-    public function addLoadedObject(Model $model): void
+
+    public function addReferenceEntity(Model $model): void
     {
         $modelClass = get_class($model);
         if (!array_key_exists($modelClass, $this->referenceObjects)) {
@@ -89,7 +101,10 @@ abstract class MToMModel extends Model
 
 
     /**
-     * used by ModelWithMToMTrait to get the correct
+     *  used by ModelWithMToMTrait to get the correct field name that corresponds to one of the linked Models
+     *
+     * @param Model $model
+     * @return string
      */
     public function getFieldNameForModel(Model $model): string
     {
@@ -106,16 +121,22 @@ abstract class MToMModel extends Model
 
     /**
      * results ín e.g. $this->addCondition('student_id', 5);
+     *
+     * @param Model $model
+     * @return void
      */
-    public function addConditionForModel(Model $model)
+    public function addConditionForModel(Model $model): void
     {
         $this->addCondition($this->getFieldNameForModel($model), $model->get($model->id_field));
     }
 
 
     /**
-     * We will have 2 Model classes defined which the MToMmodel will connect. This function returns the class name of
+     * We will have 2 Model classes defined which the MToMModel will connect. This function returns the class name of
      * the other class if one is passed
+     *
+     * @param Model $model
+     * @return string
      */
     public function getOtherModelClass(Model $model): string
     {
