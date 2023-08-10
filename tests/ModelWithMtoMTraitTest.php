@@ -17,7 +17,7 @@ use mtomforatk\tests\testmodels\StudentToLesson;
  * @package PMRAtk\tests\phpunit\Data\Traits
  */
 class ModelWithMtoMTraitTest extends TestCase
-{   
+{
 
     protected array $sqlitePersistenceModels = [
         StudentToLesson::class,
@@ -25,7 +25,7 @@ class ModelWithMtoMTraitTest extends TestCase
         Lesson::class
     ];
 
-    public function testMToMAdding()
+    public function testMToMAdding(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -37,12 +37,12 @@ class ModelWithMtoMTraitTest extends TestCase
         $student->addMToMRelation(new StudentToLesson($persistence), $lesson);
         self::assertEquals($studentToLessonCount + 1, (new StudentToLesson($persistence))->action('count')->getOne());
 
-        //adding again shouldnt create a new record
+        //adding again shouldn't create a new record
         $student->addMToMRelation(new StudentToLesson($persistence), $lesson);
         self::assertEquals($studentToLessonCount + 1, (new StudentToLesson($persistence))->action('count')->getOne());
     }
 
-    public function testMToMAddingThrowExceptionThisNotLoaded()
+    public function testMToMAddingThrowExceptionThisNotLoaded(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -53,7 +53,7 @@ class ModelWithMtoMTraitTest extends TestCase
         $student->addMToMRelation(new StudentToLesson($persistence), $lesson);
     }
 
-    public function testMToMAddingThrowExceptionObjectNotLoaded()
+    public function testMToMAddingThrowExceptionObjectNotLoaded(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -64,7 +64,7 @@ class ModelWithMtoMTraitTest extends TestCase
         $student->addMToMRelation(new StudentToLesson($persistence), $lesson);
     }
 
-    public function testMToMAddingById()
+    public function testMToMAddingById(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -73,11 +73,11 @@ class ModelWithMtoMTraitTest extends TestCase
         $lesson->save();
 
         $studentToLessonCount = (new StudentToLesson($persistence))->action('count')->getOne();
-        $student->addMToMRelation(new StudentToLesson($persistence),$lesson->getId());
+        $student->addMToMRelation(new StudentToLesson($persistence), $lesson->getId());
         self::assertEquals($studentToLessonCount + 1, (new StudentToLesson($persistence))->action('count')->getOne());
     }
 
-    public function testMToMAddingByInvalidId()
+    public function testMToMAddingByInvalidId(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -87,7 +87,7 @@ class ModelWithMtoMTraitTest extends TestCase
         $student->addMToMRelation(new StudentToLesson($persistence), 123456);
     }
 
-    public function testMToMRemoval()
+    public function testMToMRemoval(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -106,7 +106,7 @@ class ModelWithMtoMTraitTest extends TestCase
         $student->removeMToMRelation(new StudentToLesson($persistence), $lesson);
     }
 
-    public function testMToMRemovalThrowExceptionThisNotLoaded()
+    public function testMToMRemovalThrowExceptionThisNotLoaded(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -117,7 +117,7 @@ class ModelWithMtoMTraitTest extends TestCase
         $student->removeMToMRelation(new StudentToLesson($persistence), $lesson);
     }
 
-    public function testMToMRemovalThrowExceptionObjectNotLoaded()
+    public function testMToMRemovalThrowExceptionObjectNotLoaded(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -128,7 +128,7 @@ class ModelWithMtoMTraitTest extends TestCase
         $student->removeMToMRelation(new StudentToLesson($persistence), $lesson);
     }
 
-    public function testHasMToMReference()
+    public function testHasMToMReference(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -145,7 +145,7 @@ class ModelWithMtoMTraitTest extends TestCase
         self::assertFalse($lesson->hasMToMRelation(new StudentToLesson($persistence), $student));
     }
 
-    public function testhasMToMRelationThrowExceptionThisNotLoaded()
+    public function testhasMToMRelationThrowExceptionThisNotLoaded(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -156,7 +156,7 @@ class ModelWithMtoMTraitTest extends TestCase
         $student->hasMToMRelation(new StudentToLesson($persistence), $lesson);
     }
 
-    public function testhasMToMRelationThrowExceptionObjectNotLoaded()
+    public function testhasMToMRelationThrowExceptionObjectNotLoaded(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -167,7 +167,7 @@ class ModelWithMtoMTraitTest extends TestCase
         $student->hasMToMRelation(new StudentToLesson($persistence), $lesson);
     }
 
-    public function testMToMAddingWrongClassException()
+    public function testMToMAddingWrongClassException(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -176,7 +176,7 @@ class ModelWithMtoMTraitTest extends TestCase
         $student->addMToMRelation(new StudentToLesson($persistence), $student);
     }
 
-    public function testMToMRemovalWrongClassException()
+    public function testMToMRemovalWrongClassException(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -188,7 +188,7 @@ class ModelWithMtoMTraitTest extends TestCase
         $student->removeMToMRelation(new StudentToLesson($persistence), $student);
     }
 
-    public function testhasMToMRelationWrongClassException()
+    public function testhasMToMRelationWrongClassException(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -200,7 +200,7 @@ class ModelWithMtoMTraitTest extends TestCase
         $student->hasMToMRelation(new StudentToLesson($persistence), $student);
     }
 
-    public function testAddAdditionalFields()
+    public function testAddAdditionalFields(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -217,7 +217,7 @@ class ModelWithMtoMTraitTest extends TestCase
         self::assertEquals($mtommodel->get('some_other_field'), 'LALA');
     }
 
-    public function testMToMModelIsReturned()
+    public function testMToMModelIsReturned(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -231,7 +231,7 @@ class ModelWithMtoMTraitTest extends TestCase
         self::assertInstanceOf(StudentToLesson::class, $res);
     }
 
-    public function testOnAfterDeleteHookDeletesMToMModel()
+    public function testOnAfterDeleteHookDeletesMToMModel(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
@@ -247,29 +247,39 @@ class ModelWithMtoMTraitTest extends TestCase
         self::assertEquals(0, $studentToLessonCount);
     }
 
-    public function testReferenceNameDefaultsToClassName() {
+    public function testReferenceNameDefaultsToClassName(): void
+    {
         $persistence = $this->getSqliteTestPersistence();
         $student = new Student($persistence);
-        self::assertTrue($student->hasRef(StudentToLesson::class));
+        self::assertTrue($student->hasReference(StudentToLesson::class));
     }
 
-    public function testAddMToMModelDefaults(): void {
-        $defaultTester = new DefaultTester($this->getSqliteTestPersistence(), ['mToMModelDefaults' => ['caption' => 'SomeOtherCaption']]);
+    public function testAddMToMModelDefaults(): void
+    {
+        $defaultTester = new DefaultTester(
+            $this->getSqliteTestPersistence(),
+            ['mToMModelDefaults' => ['caption' => 'SomeOtherCaption']]
+        );
         self::assertSame(
             'SomeOtherCaption',
             $defaultTester->ref(StudentToLesson::class)->getModelCaption()
         );
     }
 
-    public function testAddReferenceDefaults(): void {
-        $defaultTester = new DefaultTester($this->getSqliteTestPersistence(), ['referenceDefaults' => ['caption' => 'SomeOtherCaption']]);
+    public function testAddReferenceDefaults(): void
+    {
+        $defaultTester = new DefaultTester(
+            $this->getSqliteTestPersistence(),
+            ['referenceDefaults' => ['caption' => 'SomeOtherCaption']]
+        );
         self::assertSame(
             'SomeOtherCaption',
             $defaultTester->getRef(StudentToLesson::class)->caption
         );
     }
 
-    public function testExceptionInvalidClassNamePassedToReferenceCreation() {
+    public function testExceptionInvalidClassNamePassedToReferenceCreation(): void
+    {
         $persistence = $this->getSqliteTestPersistence();
         $class = new class() extends Model {
 
@@ -288,7 +298,8 @@ class ModelWithMtoMTraitTest extends TestCase
         $model = new $class($persistence);
     }
 
-    public function testDifferentReferenceNameCanBeGiven() {
+    public function testDifferentReferenceNameCanBeGiven(): void
+    {
         $persistence = $this->getSqliteTestPersistence();
         $class = new class() extends Model {
 
@@ -306,7 +317,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
         $model = new $class($persistence);
 
-        self::assertFalse($model->hasRef(StudentToLesson::class));
-        self::assertTrue($model->hasRef('SomeOtherReferenceName'));
+        self::assertFalse($model->hasReference(StudentToLesson::class));
+        self::assertTrue($model->hasReference('SomeOtherReferenceName'));
     }
 }
