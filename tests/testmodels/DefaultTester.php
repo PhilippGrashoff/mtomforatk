@@ -2,6 +2,7 @@
 
 namespace mtomforatk\tests\testmodels;
 
+use Atk4\Data\Exception;
 use Atk4\Data\Model;
 use mtomforatk\ModelWithMToMTrait;
 
@@ -16,6 +17,9 @@ class DefaultTester extends Model
     protected array $mToMModelDefaults = [];
 
 
+    /**
+     * @throws Exception
+     */
     protected function init(): void {
         parent::init();
 

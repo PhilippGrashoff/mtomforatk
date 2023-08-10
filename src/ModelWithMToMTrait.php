@@ -2,6 +2,7 @@
 
 namespace mtomforatk;
 
+use Atk4\Data\Exception;
 use Atk4\Data\Model;
 use Atk4\Data\Reference;
 
@@ -17,14 +18,17 @@ trait ModelWithMToMTrait
      *  First checks if record does exist already, and only then adds new relation.
      *
      * @param MToMModel $mToMModel
-     * @param $otherModel
+     * @param string|int|Model $otherModel //if string or int, then it's only an ID
      * @param array<string,mixed> $additionalFields
      * @return MToMModel
-     * @throws \Atk4\Data\Exception
+     * @throws Exception
      * @throws \Atk4\Core\Exception
      */
-    public function addMToMRelation(MToMModel $mToMModel, $otherModel, array $additionalFields = []): MToMModel
-    {
+    public function addMToMRelation(
+        MToMModel $mToMModel,
+        string|int|Model $otherModel,
+        array $additionalFields = []
+    ): MToMModel {
         //$this needs to be loaded to get ID
         $this->assertIsLoaded();
         $otherModel = $this->getOtherEntity($otherModel, $mToMModel);
@@ -34,8 +38,8 @@ trait ModelWithMToMTrait
         $mToMModel->tryLoadAny();
 
         //set values
-        $mToMModel->set($mToMModel->getFieldNameForModel($this), $this->get('id'));
-        $mToMModel->set($mToMModel->getFieldNameForModel($otherModel), $otherModel->get('id'));
+        $mToMModel->set($mToMModel->getFieldNameForModel($this), $this->getId());
+        $mToMModel->set($mToMModel->getFieldNameForModel($otherModel), $otherModel->getId());
 
         //set additional field values
         foreach ($additionalFields as $fieldName => $value) {
@@ -43,7 +47,7 @@ trait ModelWithMToMTrait
         }
 
         //no reload necessary after insert
-        $mToMModel->reload_after_save = false;
+        $mToMModel->reloadAfterSave = false;
         //if that record already exists mysql will throw an error if unique index is set, catch here
         $mToMModel->save();
         $mToMModel->addReferenceEntity($this);
@@ -58,10 +62,11 @@ trait ModelWithMToMTrait
      *  GuestToGroup etc.
      *
      * @param MToMModel $mToMModel
-     * @param $otherModel
+     * @param string|int|Model $otherModel //if string or int, then it's only an ID
      * @return MToMModel
+     * @throws Exception
      */
-    public function removeMToMRelation(MToMModel $mToMModel, $otherModel): MToMModel
+    public function removeMToMRelation(MToMModel $mToMModel, string|int|Model $otherModel): MToMModel
     {
         //$this needs to be loaded to get ID
         $this->assertIsLoaded();
@@ -82,10 +87,11 @@ trait ModelWithMToMTrait
      * specific student and lesson
      *
      * @param MToMModel $mToMModel
-     * @param $otherModel
+     * @param string|int|Model $otherModel //if string or int, then it's only an ID
      * @return bool
+     * @throws Exception
      */
-    public function hasMToMRelation(MToMModel $mToMModel, $otherModel): bool
+    public function hasMToMRelation(MToMModel $mToMModel, string|int|Model $otherModel): bool
     {
         $this->assertIsLoaded();
         $otherModel = $this->getOtherEntity($otherModel, $mToMModel);
@@ -94,7 +100,7 @@ trait ModelWithMToMTrait
         $mToMModel->addConditionForModel($otherModel);
         $mToMModel->tryLoadAny();
 
-        return $mToMModel->loaded();
+        return $mToMModel->isLoaded();
     }
 
     /**
@@ -103,17 +109,20 @@ trait ModelWithMToMTrait
      * This way, no outdated intermediate models exist.
      * Returns HasMany reference for further modifying reference if needed.
      *
-     * @param string $mtomClassName
+     * @param class-string<MToMModel> $mtomClassName
      * @param string $referenceName
-     * @param array $referenceDefaults
-     * @param array $mtomClassDefaults
+     * @param array<string,mixed> $referenceDefaults
+     * @param array<string,mixed> $mtomClassDefaults
+     * @param bool $addDeleteHook
      * @return Reference\HasMany
+     * @throws Exception
      */
     protected function addMToMReferenceAndDeleteHook(
         string $mtomClassName,
         string $referenceName = '',
         array $referenceDefaults = [],
-        array $mtomClassDefaults = []
+        array $mtomClassDefaults = [],
+        bool $addDeleteHook = true
     ): Reference\HasMany {
         //if no reference name was passed, use Class name
         if (!$referenceName) {
@@ -128,14 +137,16 @@ trait ModelWithMToMTrait
             $referenceName,
             array_merge(['model' => array_merge([$mtomClassName], $mtomClassDefaults)], $referenceDefaults)
         );
-        $this->onHook(
-            Model::HOOK_BEFORE_DELETE,
-            function ($model) use ($referenceName): void {
-                foreach ($model->ref($referenceName) as $mtomModel) {
-                    $mtomModel->delete();
+        if ($addDeleteHook) {
+            $this->onHook(
+                Model::HOOK_BEFORE_DELETE,
+                function ($model) use ($referenceName): void {
+                    foreach ($model->ref($referenceName) as $mtomModel) {
+                        $mtomModel->delete();
+                    }
                 }
-            }
-        );
+            );
+        }
 
         return $reference;
     }
@@ -146,12 +157,14 @@ trait ModelWithMToMTrait
      * Make sure passed model is of the correct class.
      * Check other model is loaded so id can be gotten.
      *
-     * @param $otherModel
+     * @param string|int|Model $otherModel //if string or int, then it's only an ID
      * @param MToMModel $mToMModel
      * @return Model
+     * @throws Exception
      */
-    protected function getOtherEntity($otherModel, MToMModel $mToMModel): Model
+    protected function getOtherEntity(string|int|Model $otherModel, MToMModel $mToMModel): Model
     {
+        /** @var class-string<Model> $otherModelClass */
         $otherModelClass = $mToMModel->getOtherModelClass($this);
         if (is_object($otherModel)) {
             //only check if it's a model of the correct class; also check if accidentally $this was passed
@@ -163,12 +176,12 @@ trait ModelWithMToMTrait
             }
         } else {
             $id = $otherModel;
-            $otherModel = new $otherModelClass($this->persistence);
+            $otherModel = new $otherModelClass($this->getPersistence());
             $otherModel->tryLoad($id);
         }
 
         //make sure object is loaded
-        if (!$otherModel->loaded()) {
+        if (!$otherModel->isLoaded()) {
             throw new Exception('Object could not be loaded in ' . __FUNCTION__);
         }
 

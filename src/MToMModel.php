@@ -10,7 +10,7 @@ abstract class MToMModel extends Model
 {
 
     /**
-     * @param array<string,string> $fieldNamesForReferencedClasses
+     * @var  array<string,class-string|null> $fieldNamesForReferencedClasses
      * with 2 keys and 2 values. Set these four strings child classes.
      * Will be used to create hasOne Reference Fields in init()
      * e.g. [
@@ -21,7 +21,7 @@ abstract class MToMModel extends Model
     protected array $fieldNamesForReferencedClasses = [];
 
     /**
-     * @param array<class-string,Model> $referenceObjects containing instances of the two linked models. Useful for re-using them and saving DB requests
+     * @var array<class-string,Model|null> $referenceObjects containing instances of the two linked models. Useful for re-using them and saving DB requests
      */
     protected array $referenceObjects = [];
 
@@ -58,11 +58,11 @@ abstract class MToMModel extends Model
 
 
     /**
-     *  Shortcut to get a record from each of the linked classes. e.g.
+     *  Shortcut to get an entity from each of the linked classes. e.g.
      *  $studentToLesson = $student->addLesson(4); //add Lesson by ID, no lesson object yet
-     *  $lesson = $studentToLesson->getObject(Lesson::class); //will return Lesson record with ID 4
+     *  $lesson = $studentToLesson->getReferenceEntity(Lesson::class); //will return Lesson record with ID 4
      *
-     * @param string $className
+     * @param class-string<Model> $className
      * @return Model|null
      * @throws Exception
      */
@@ -74,7 +74,7 @@ abstract class MToMModel extends Model
 
         //load if necessary
         if (!$this->referenceObjects[$className] instanceof $className) {
-            $this->referenceObjects[$className] = new $className($this->persistence);
+            $this->referenceObjects[$className] = new $className($this->getPersistence());
             //will throw exception if record isn't found
             $this->referenceObjects[$className]->load(
                 $this->get(array_search($className, $this->fieldNamesForReferencedClasses))
@@ -133,7 +133,7 @@ abstract class MToMModel extends Model
      */
     public function addConditionForModel(Model $model): void
     {
-        $this->addCondition($this->getFieldNameForModel($model), $model->get($model->id_field));
+        $this->addCondition($this->getFieldNameForModel($model), $model->getId());
     }
 
 
@@ -142,7 +142,7 @@ abstract class MToMModel extends Model
      * the other class if one is passed
      *
      * @param Model $model
-     * @return string
+     * @return class-string<Model>
      * @throws Exception
      */
     public function getOtherModelClass(Model $model): string

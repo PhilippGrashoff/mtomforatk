@@ -120,11 +120,11 @@ class MToMModelTest extends TestCase
         $studentToLesson = new StudentToLesson($persistence);
 
         //gets loaded from DB
-        $studentToLesson->set('student_id', $student->get('id'));
+        $studentToLesson->set('student_id', $student->getId());
         $resA = $studentToLesson->getReferenceEntity(Student::class);
         //different Object but same ID
         self::assertNotSame($student, $resA);
-        self::assertSame($student->get('id'), $resA->get('id'));
+        self::assertSame($student->getId(), $resA->getId());
 
         //is put in referenceObjects Array, should return same object
         $studentToLesson->addReferenceEntity($lesson);

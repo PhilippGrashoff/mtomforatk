@@ -73,7 +73,7 @@ class ModelWithMtoMTraitTest extends TestCase
         $lesson->save();
 
         $studentToLessonCount = (new StudentToLesson($persistence))->action('count')->getOne();
-        $student->addMToMRelation(new StudentToLesson($persistence),$lesson->get('id'));
+        $student->addMToMRelation(new StudentToLesson($persistence),$lesson->getId());
         self::assertEquals($studentToLessonCount + 1, (new StudentToLesson($persistence))->action('count')->getOne());
     }
 
