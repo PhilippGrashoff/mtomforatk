@@ -35,25 +35,24 @@ trait ModelWithMToMTrait
         //check if reference already exists, if so update existing record only
         $mToMModel->addConditionForModel($this);
         $mToMModel->addConditionForModel($otherModel);
-        $mToMModel->tryLoadAny();
+        //no reload necessary after insert
+        $mToMModel->reloadAfterSave = false;
+        $mToMEntity = $mToMModel->tryLoadAny() ?? $mToMModel->createEntity();
 
-        //set values
-        $mToMModel->set($mToMModel->getFieldNameForModel($this), $this->getId());
-        $mToMModel->set($mToMModel->getFieldNameForModel($otherModel), $otherModel->getId());
+        $mToMEntity->set($mToMEntity->getFieldNameForModel($this), $this->getId());
+        $mToMEntity->set($mToMEntity->getFieldNameForModel($otherModel), $otherModel->getId());
 
         //set additional field values
         foreach ($additionalFields as $fieldName => $value) {
-            $mToMModel->set($fieldName, $value);
+            $mToMEntity->set($fieldName, $value);
         }
 
-        //no reload necessary after insert
-        $mToMModel->reloadAfterSave = false;
         //if that record already exists mysql will throw an error if unique index is set, catch here
-        $mToMModel->save();
-        $mToMModel->addReferenceEntity($this);
-        $mToMModel->addReferenceEntity($otherModel);
+        $mToMEntity->save();
+        $mToMEntity->addReferencedEntity($this);
+        $mToMEntity->addReferencedEntity($otherModel);
 
-        return $mToMModel;
+        return $mToMEntity;
     }
 
 
@@ -75,7 +74,7 @@ trait ModelWithMToMTrait
         $mToMModel->addConditionForModel($this);
         $mToMModel->addConditionForModel($otherModel);
         //loadAny as it will throw exception when record is not found
-        $mToMModel->loadAny();
+        $mToMModel = $mToMModel->loadAny();
         $mToMModel->delete();
 
         return $mToMModel;
@@ -83,7 +82,7 @@ trait ModelWithMToMTrait
 
 
     /**
-     * checks if a MtoM reference to the given object exists or not, e.g. if a StudentToLesson record exists for a
+     * checks if a MtoM reference to the given entity exists or not, e.g. if a StudentToLesson record exists for a
      * specific student and lesson
      *
      * @param MToMModel $mToMModel
@@ -98,9 +97,9 @@ trait ModelWithMToMTrait
 
         $mToMModel->addConditionForModel($this);
         $mToMModel->addConditionForModel($otherModel);
-        $mToMModel->tryLoadAny();
+        $mToMEntity = $mToMModel->tryLoadAny();
 
-        return $mToMModel->isLoaded();
+        return $mToMEntity !== null;
     }
 
     /**
@@ -157,34 +156,33 @@ trait ModelWithMToMTrait
      * Make sure passed model is of the correct class.
      * Check other model is loaded so id can be gotten.
      *
-     * @param string|int|Model $otherModel //if string or int, then it's only an ID
+     * @param string|int|Model $otherEntity //if string or int, then it's only an ID
      * @param MToMModel $mToMModel
      * @return Model
      * @throws Exception
      */
-    protected function getOtherEntity(string|int|Model $otherModel, MToMModel $mToMModel): Model
+    protected function getOtherEntity(string|int|Model $otherEntity, MToMModel $mToMModel): Model
     {
-        /** @var class-string<Model> $otherModelClass */
         $otherModelClass = $mToMModel->getOtherModelClass($this);
-        if (is_object($otherModel)) {
+        if (is_object($otherEntity)) {
             //only check if it's a model of the correct class; also check if accidentally $this was passed
-            if (get_class($otherModel) !== $otherModelClass) {
+            if (get_class($otherEntity) !== $otherModelClass) {
                 throw new Exception(
                     'Object of wrong class was passed: ' . $mToMModel->getOtherModelClass($this)
-                    . 'expected, ' . get_class($otherModel) . ' passed.'
+                    . 'expected, ' . get_class($otherEntity) . ' passed.'
                 );
             }
         } else {
-            $id = $otherModel;
-            $otherModel = new $otherModelClass($this->getPersistence());
-            $otherModel->tryLoad($id);
+            $id = $otherEntity;
+            $otherEntity = new $otherModelClass($this->getPersistence());
+            $otherEntity = $otherEntity->tryLoad($id);
         }
 
-        //make sure object is loaded
-        if (!$otherModel->isLoaded()) {
-            throw new Exception('Object could not be loaded in ' . __FUNCTION__);
+        //make sure entity is loaded
+        if (!$otherEntity || !$otherEntity->isLoaded()) {
+            throw new Exception('otherEntity could not be loaded in ' . __FUNCTION__);
         }
 
-        return $otherModel;
+        return $otherEntity;
     }
 }

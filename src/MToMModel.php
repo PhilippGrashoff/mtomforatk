@@ -10,7 +10,7 @@ abstract class MToMModel extends Model
 {
 
     /**
-     * @var  array<string,class-string|null> $fieldNamesForReferencedClasses
+     * @var  array<string,class-string|null> $fieldNamesForReferencedEntities
      * with 2 keys and 2 values. Set these four strings child classes.
      * Will be used to create hasOne Reference Fields in init()
      * e.g. [
@@ -18,12 +18,13 @@ abstract class MToMModel extends Model
      *          'lesson_id' => Lesson::class
      *      ]
      */
-    protected array $fieldNamesForReferencedClasses = [];
+    protected array $fieldNamesForReferencedEntities = [];
 
     /**
-     * @var array<class-string,Model|null> $referenceObjects containing instances of the two linked models. Useful for re-using them and saving DB requests
+     * @var array<class-string,Model|null> $referencedEntities
+     * containing instances of the two linked models. Useful for re-using them and saving DB requests
      */
-    protected array $referenceObjects = [];
+    protected array $referencedEntities = [];
 
 
     /**
@@ -37,70 +38,72 @@ abstract class MToMModel extends Model
     {
         parent::init();
         //make sure 2 classes to link are defined
-        if (count($this->fieldNamesForReferencedClasses) !== 2) {
+        if (count($this->fieldNamesForReferencedEntities) !== 2) {
             throw new Exception(
                 '2 Fields and corresponding classes need to be defined in fieldNamesForReferencedClasses array'
             );
         }
         if (
-            !class_exists(reset($this->fieldNamesForReferencedClasses))
-            || !class_exists(end($this->fieldNamesForReferencedClasses))
+            !class_exists(reset($this->fieldNamesForReferencedEntities))
+            || !class_exists(end($this->fieldNamesForReferencedEntities))
         ) {
             throw new Exception('Non existent Class defined in fieldNamesForReferencedClasses array');
         }
 
-        foreach ($this->fieldNamesForReferencedClasses as $fieldName => $className) {
+        foreach ($this->fieldNamesForReferencedEntities as $fieldName => $className) {
             /** @var class-string $className */
-            $this->hasOne($fieldName, ['model' => [$className]]);
-            $this->referenceObjects[$className] = null;
+            $this->hasOne($fieldName, ['model' => [$className], 'required' => true]);
+            $this->referencedEntities[$className] = null;
         }
     }
 
 
     /**
      *  Shortcut to get an entity from each of the linked classes. e.g.
-     *  $studentToLesson = $student->addLesson(4); //add Lesson by ID, no lesson object yet
+     *  $studentToLesson = $student->addLesson(4); //add Lesson by ID, no lesson entity yet
      *  $lesson = $studentToLesson->getReferenceEntity(Lesson::class); //will return Lesson record with ID 4
      *
      * @param class-string<Model> $className
      * @return Model|null
      * @throws Exception
      */
-    public function getReferenceEntity(string $className): ?Model
+    public function getReferencedEntity(string $className): Model
     {
-        if (!array_key_exists($className, $this->referenceObjects)) {
+        $this->assertIsEntity();
+        if (!array_key_exists($className, $this->referencedEntities)) {
             throw new Exception('Invalid className passed in ' . __FUNCTION__);
         }
 
         //load if necessary
-        if (!$this->referenceObjects[$className] instanceof $className) {
-            $this->referenceObjects[$className] = new $className($this->getPersistence());
+        if ($this->referencedEntities[$className] === null) {
+            $model = new $className($this->getPersistence());
             //will throw exception if record isn't found
-            $this->referenceObjects[$className]->load(
-                $this->get(array_search($className, $this->fieldNamesForReferencedClasses))
+            $this->referencedEntities[$className] = $model->load(
+                $this->get(array_search($className, $this->fieldNamesForReferencedEntities))
             );
         }
 
-        return $this->referenceObjects[$className];
+        return $this->referencedEntities[$className];
     }
 
 
     /**
-     *  used by ModelWithMToMTrait to make records available in getObject() without extra DB request
+     *  used by ModelWithMToMTrait to make records available in getReferencedEntity() without extra DB request
      *
-     * @param Model $model
+     * @param Model $entity
      * @return void
      * @throws Exception
      */
 
-    public function addReferenceEntity(Model $model): void
+    public function addReferencedEntity(Model $entity): void
     {
-        $modelClass = get_class($model);
-        if (!array_key_exists($modelClass, $this->referenceObjects)) {
-            throw new Exception('This class does not have a reference to ' . $modelClass);
+        $entity->assertIsEntity();
+        $modelClass = get_class($entity);
+        if (!array_key_exists($modelClass, $this->referencedEntities)) {
+            throw new Exception('This ' . __CLASS__ . ' does not have a reference to ' . $modelClass);
         }
 
-        $this->referenceObjects[$modelClass] = $model;
+        $this->referencedEntities[$modelClass] = $entity;
     }
 
 
@@ -113,10 +116,10 @@ abstract class MToMModel extends Model
      */
     public function getFieldNameForModel(Model $model): string
     {
-        $fieldName = array_search(get_class($model), $this->fieldNamesForReferencedClasses);
+        $fieldName = array_search(get_class($model), $this->fieldNamesForReferencedEntities);
         if (!$fieldName) {
             throw new Exception(
-                'No field name defined in $fieldNamesForReferencedClasses for Class ' . get_class($model)
+                'No field name defined in $fieldNamesForReferencedEntities for Class ' . get_class($model)
             );
         }
 
@@ -127,13 +130,14 @@ abstract class MToMModel extends Model
     /**
      * results ín e.g. $this->addCondition('student_id', 5);
      *
-     * @param Model $model
+     * @param Model $entity
      * @return void
      * @throws Exception
      */
-    public function addConditionForModel(Model $model): void
+    public function addConditionForModel(Model $entity): void
     {
-        $this->addCondition($this->getFieldNameForModel($model), $model->getId());
+        $entity->assertIsEntity();
+        $this->addCondition($this->getFieldNameForModel($entity), $entity->getId());
     }
 
 
@@ -148,14 +152,14 @@ abstract class MToMModel extends Model
     public function getOtherModelClass(Model $model): string
     {
         $modelClass = get_class($model);
-        if (!in_array($modelClass, $this->fieldNamesForReferencedClasses)) {
+        if (!in_array($modelClass, $this->fieldNamesForReferencedEntities)) {
             throw new Exception('Class ' . $modelClass . 'not found in fieldNamesForReferencedClasses');
         }
 
         //as array has 2 elements, return second if passed class is the first, else otherwise
-        if (reset($this->fieldNamesForReferencedClasses) === $modelClass) {
-            return end($this->fieldNamesForReferencedClasses);
+        if (reset($this->fieldNamesForReferencedEntities) === $modelClass) {
+            return end($this->fieldNamesForReferencedEntities);
         }
-        return reset($this->fieldNamesForReferencedClasses);
+        return reset($this->fieldNamesForReferencedEntities);
     }
 }

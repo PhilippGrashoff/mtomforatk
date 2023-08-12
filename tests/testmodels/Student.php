@@ -22,14 +22,14 @@ class Student extends Model
     }
 
     public function addLesson($lesson, array $additionalFields = []) {
-        return $this->addMToMRelation(new StudentToLesson($this->persistence), $lesson, $additionalFields);
+        return $this->addMToMRelation(new StudentToLesson($this->getPersistence()), $lesson, $additionalFields);
     }
 
     public function removeLesson($lesson) {
-        return $this->removeMToMRelation(new StudentToLesson($this->persistence), $lesson);
+        return $this->removeMToMRelation(new StudentToLesson($this->getPersistence()), $lesson);
     }
 
     public function hasLessonRelation($lesson) {
-        return $this->hasMToMRelation(new StudentToLesson($this->persistence), $lesson);
+        return $this->hasMToMRelation(new StudentToLesson($this->getPersistence()), $lesson);
     }
 }

@@ -9,6 +9,7 @@ use mtomforatk\MToMModel;
 use mtomforatk\tests\testmodels\Lesson;
 use mtomforatk\tests\testmodels\Student;
 use mtomforatk\tests\testmodels\StudentToLesson;
+use mtomforatk\tests\testmodels\Teacher;
 
 
 class MToMModelTest extends TestCase
@@ -33,7 +34,7 @@ class MToMModelTest extends TestCase
     {
         $persistence = $this->getSqliteTestPersistence();
         $someClassWith3Elements = new class() extends MToMModel {
-            protected array $fieldNamesForReferencedClasses = [
+            protected array $fieldNamesForReferencedEntities = [
                 'field1' => 'Blabla',
                 'field2' => 'DaDa',
                 'field3' => 'Gaga'
@@ -47,7 +48,7 @@ class MToMModelTest extends TestCase
     {
         $persistence = $this->getSqliteTestPersistence();
         $someClassWith1Element = new class() extends MToMModel {
-            protected array $fieldNamesForReferencedClasses = [
+            protected array $fieldNamesForReferencedEntities = [
                 'field1' => 'Blabla'
             ];
         };
@@ -59,7 +60,7 @@ class MToMModelTest extends TestCase
     {
         $persistence = $this->getSqliteTestPersistence();
         $someClassWithInvalidClassDefinition = new class() extends MToMModel {
-            protected array $fieldNamesForReferencedClasses = [
+            protected array $fieldNamesForReferencedEntities = [
                 'field1' => Student::class,
                 'field2' => 'SomeNonExistantModel'
             ];
@@ -68,27 +69,27 @@ class MToMModelTest extends TestCase
         $instance = new $someClassWithInvalidClassDefinition($persistence);
     }
 
-    public function testReferenceObjectKeysCreatedInArray(): void
+    public function testReferencedEntitiesKeysCreatedInArray(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $studentToLesson = new StudentToLesson($persistence);
-        $referenceObjects = (new \ReflectionClass($studentToLesson))->getProperty('referenceObjects');
-        $referenceObjects->setAccessible(true);
-        $value = $referenceObjects->getValue($studentToLesson);
+        $referencedEntities = (new \ReflectionClass($studentToLesson))->getProperty('referencedEntities');
+        $referencedEntities->setAccessible(true);
+        $value = $referencedEntities->getValue($studentToLesson);
         self::assertIsArray($value);
         self::assertArrayHasKey(Student::class, $value);
         self::assertArrayHasKey(Lesson::class, $value);
     }
 
-    public function testAddLoadedObject(): void
+    public function testAddLoadedEntity(): void
     {
         $persistence = $this->getSqliteTestPersistence();
-        $student = new Student($persistence);
+        $student = (new Student($persistence))->createEntity();
         $student->save();
         $studentToLesson = new StudentToLesson($persistence);
-        $studentToLesson->addReferenceEntity($student);
+        $studentToLesson->addReferencedEntity($student);
         $props = (new \ReflectionClass($studentToLesson))->getProperty(
-            'referenceObjects'
+            'referencedEntities'
         );//getProperties(\ReflectionProperty::IS_PROTECTED);
         $props->setAccessible(true);
         $value = $props->getValue($studentToLesson);
@@ -98,7 +99,7 @@ class MToMModelTest extends TestCase
         );
     }
 
-    public function testAddLoadedObjectExceptionWrongClassPassed(): void
+    public function testAddReferencedEntityExceptionWrongClassPassed(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $otherClass = new class() extends Model {
@@ -107,37 +108,37 @@ class MToMModelTest extends TestCase
         $model = new $otherClass($persistence);
         $studentToLesson = new StudentToLesson($persistence);
         self::expectException(Exception::class);
-        $studentToLesson->addReferenceEntity($model);
+        $studentToLesson->addReferencedEntity($model);
     }
 
-    public function testgetObject(): void
+    public function testGetReferenceEntity(): void
     {
         $persistence = $this->getSqliteTestPersistence();
-        $student = new Student($persistence);
-        $lesson = new Lesson($persistence);
+        $student = (new Student($persistence))->createEntity();
+        $lesson = (new Lesson($persistence))->createEntity();
         $student->save();
         $lesson->save();
-        $studentToLesson = new StudentToLesson($persistence);
+        $studentToLesson = (new StudentToLesson($persistence))->createEntity();
 
         //gets loaded from DB
         $studentToLesson->set('student_id', $student->getId());
-        $resA = $studentToLesson->getReferenceEntity(Student::class);
+        $resA = $studentToLesson->getReferencedEntity(Student::class);
         //different Object but same ID
         self::assertNotSame($student, $resA);
         self::assertSame($student->getId(), $resA->getId());
 
-        //is put in referenceObjects Array, should return same object
-        $studentToLesson->addReferenceEntity($lesson);
-        $resB = $studentToLesson->getReferenceEntity(Lesson::class);
+        //is put in $referencedEntities Array, should return same object
+        $studentToLesson->addReferencedEntity($lesson);
+        $resB = $studentToLesson->getReferencedEntity(Lesson::class);
         self::assertSame($lesson, $resB);
     }
 
-    public function testgetObjectExceptionInvalidClass(): void
+    public function testGetReferencedEntityExceptionInvalidClass(): void
     {
         $persistence = $this->getSqliteTestPersistence();
         $studentToLesson = new StudentToLesson($persistence);
         self::expectException(Exception::class);
-        $resA = $studentToLesson->getReferenceEntity('SomeNonSetClass');
+        $resA = $studentToLesson->getReferencedEntity('SomeNonSetClass');
     }
 
     public function testgetFieldNameForModel(): void
@@ -172,13 +173,47 @@ class MToMModelTest extends TestCase
         $studentToLesson->getOtherModelClass(new StudentToLesson($persistence));
     }
 
+    public function testGetReferencedEntityExceptionInvalidArrayKeyGiven(): void
+    {
+        $persistence = $this->getSqliteTestPersistence();
+        $studentToLesson = (new StudentToLesson($persistence))->createEntity();
+        $studentToLesson->set('student_id', 1);
+        $studentToLesson->set('lesson_id', 1);
+        $studentToLesson->save();
+        self::expectExceptionMessage('Invalid className passed in getReferencedEntity');
+        $studentToLesson->getReferencedEntity('someWrongClassName');
+    }
+
+    public function testSavingWithoutIDsOfEntitiesSetFails(): void
+    {
+        $persistence = $this->getSqliteTestPersistence();
+        $studentToLesson = (new StudentToLesson($persistence))->createEntity();
+        self::expectExceptionMessage('Must not be null');
+        $studentToLesson->save();
+    }
+
+    public function testAddReferencedEntityExceptionInvalidModelClassGiven(): void
+    {
+        $persistence = $this->getSqliteTestPersistence([Teacher::class]);
+        $studentToLesson = (new StudentToLesson($persistence))->createEntity();
+        $studentToLesson->set('student_id', 1);
+        $studentToLesson->set('lesson_id', 1);
+        $studentToLesson->save();
+        $teacher = (new Teacher($persistence))->createEntity();
+        $teacher->save();
+        self::expectExceptionMessage(
+            'This mtomforatk\MToMModel does not have a reference to mtomforatk\tests\testmodels\Teacher'
+        );
+        $studentToLesson->addReferencedEntity($teacher);
+    }
+
     public function testAddConditionForModel(): void
     {
         $persistence = $this->getSqliteTestPersistence();
-        $lesson = new Lesson($persistence);
+        $lesson = (new Lesson($persistence))->createEntity();
         $lesson->set('id', 234);
         $lesson->save();
-        $student = new Student($persistence);
+        $student = (new Student($persistence))->createEntity();
         $student->set('id', 456);
         $student->save();
 
@@ -187,8 +222,7 @@ class MToMModelTest extends TestCase
         $studentToLesson = new StudentToLesson($persistence);
         $studentToLesson->addConditionForModel($lesson);
         $studentToLesson->addConditionForModel($student);
-
-        $studentToLesson->loadAny();
+        $studentToLesson = $studentToLesson->loadAny();
         self::assertEquals(
             234,
             $studentToLesson->get('lesson_id')
@@ -197,6 +231,5 @@ class MToMModelTest extends TestCase
             456,
             $studentToLesson->get('student_id')
         );
-
     }
 }
