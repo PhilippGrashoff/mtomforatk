@@ -20,7 +20,8 @@ class DefaultTester extends Model
     /**
      * @throws Exception
      */
-    protected function init(): void {
+    protected function init(): void
+    {
         parent::init();
 
         $this->addField('name');

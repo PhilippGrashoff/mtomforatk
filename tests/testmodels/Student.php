@@ -13,7 +13,8 @@ class Student extends Model
     public $table = 'student';
 
 
-    protected function init(): void {
+    protected function init(): void
+    {
         parent::init();
 
         $this->addField('name');
@@ -21,15 +22,18 @@ class Student extends Model
         $this->addMToMReferenceAndDeleteHook(StudentToLesson::class);
     }
 
-    public function addLesson($lesson, array $additionalFields = []) {
+    public function addLesson($lesson, array $additionalFields = [])
+    {
         return $this->addMToMRelation(new StudentToLesson($this->getPersistence()), $lesson, $additionalFields);
     }
 
-    public function removeLesson($lesson) {
+    public function removeLesson($lesson)
+    {
         return $this->removeMToMRelation(new StudentToLesson($this->getPersistence()), $lesson);
     }
 
-    public function hasLessonRelation($lesson) {
+    public function hasLessonRelation($lesson)
+    {
         return $this->hasMToMRelation(new StudentToLesson($this->getPersistence()), $lesson);
     }
 }

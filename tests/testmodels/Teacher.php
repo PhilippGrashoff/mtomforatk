@@ -13,7 +13,8 @@ class Teacher extends Model
     public $table = 'teacher';
 
 
-    protected function init(): void {
+    protected function init(): void
+    {
         parent::init();
 
         $this->addField('name');
