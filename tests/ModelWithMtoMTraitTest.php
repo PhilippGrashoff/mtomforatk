@@ -1,16 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace mtomforatk\tests;
+namespace PhilippR\Atk4\MToM\Tests;
 
 
 use Atk4\Data\Exception;
 use Atk4\Data\Model;
 use atkextendedtestcase\TestCase;
-use mtomforatk\ModelWithMToMTrait;
-use mtomforatk\tests\testmodels\DefaultTester;
-use mtomforatk\tests\testmodels\Lesson;
-use mtomforatk\tests\testmodels\Student;
-use mtomforatk\tests\testmodels\StudentToLesson;
+use PhilippR\Atk4\MToM\MToMTait;
+use PhilippR\Atk4\MToM\Tests\Testmodels\DefaultTester;
+use PhilippR\Atk4\MToM\Tests\Testmodels\Lesson;
+use PhilippR\Atk4\MToM\Tests\Testmodels\Student;
+use PhilippR\Atk4\MToM\Tests\Testmodels\StudentToLesson;
 
 /**
  * Class MToMTraitTest
@@ -214,7 +214,7 @@ class ModelWithMtoMTraitTest extends TestCase
 
         $mtommodel = new StudentToLesson($persistence);
         $mtommodel = $mtommodel->loadAny();
-        self::assertEquals($mtommodel->get('some_other_field'), 'LALA');
+        self::assertSame('LALA', $mtommodel->get('some_other_field'));
     }
 
     public function testMToMModelIsReturned(): void
@@ -283,7 +283,7 @@ class ModelWithMtoMTraitTest extends TestCase
         $persistence = $this->getSqliteTestPersistence();
         $class = new class() extends Model {
 
-            use ModelWithMToMTrait;
+            use MToMTait;
 
             public $table = 'some_table';
 
@@ -303,7 +303,7 @@ class ModelWithMtoMTraitTest extends TestCase
         $persistence = $this->getSqliteTestPersistence();
         $class = new class() extends Model {
 
-            use ModelWithMToMTrait;
+            use MToMTait;
 
             public $table = 'some_table';
 

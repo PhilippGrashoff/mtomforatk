@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace mtomforatk;
+namespace PhilippR\Atk4\MToM;
 
 use Atk4\Data\Exception;
 use Atk4\Data\Model;
@@ -10,37 +10,37 @@ use Atk4\Data\Reference;
 /**
  * @extends Model<Model>
  */
-trait ModelWithMToMTrait
+trait MToMTait
 {
 
     /**
      *  Create a new MToM relation, e.g. a new StudentToLesson record. Called from either Student or Lesson class.
      *  First checks if record does exist already, and only then adds new relation.
      *
-     * @param MToMModel $mToMModel
-     * @param string|int|Model $otherModel //if string or int, then it's only an ID
+     * @param IntermediateModel $mToMModel
+     * @param int|Model $otherEntity //if int, then it's only an ID
      * @param array<string,mixed> $additionalFields
-     * @return MToMModel
+     * @return IntermediateModel
      * @throws Exception
      * @throws \Atk4\Core\Exception
      */
     public function addMToMRelation(
-        MToMModel $mToMModel,
-        string|int|Model $otherModel,
+        IntermediateModel $mToMModel,
+        int|Model $otherEntity,
         array $additionalFields = []
-    ): MToMModel {
+    ): IntermediateModel {
         //$this needs to be loaded to get ID
         $this->assertIsLoaded();
-        $otherModel = $this->getOtherEntity($otherModel, $mToMModel);
+        $otherEntity = $this->getOtherEntity($otherEntity, $mToMModel);
         //check if reference already exists, if so update existing record only
         $mToMModel->addConditionForModel($this);
-        $mToMModel->addConditionForModel($otherModel);
+        $mToMModel->addConditionForModel($otherEntity);
         //no reload necessary after insert
         $mToMModel->reloadAfterSave = false;
         $mToMEntity = $mToMModel->tryLoadAny() ?? $mToMModel->createEntity();
 
         $mToMEntity->set($mToMEntity->getFieldNameForModel($this), $this->getId());
-        $mToMEntity->set($mToMEntity->getFieldNameForModel($otherModel), $otherModel->getId());
+        $mToMEntity->set($mToMEntity->getFieldNameForModel($otherEntity), $otherEntity->getId());
 
         //set additional field values
         foreach ($additionalFields as $fieldName => $value) {
@@ -50,7 +50,7 @@ trait ModelWithMToMTrait
         //if that record already exists mysql will throw an error if unique index is set, catch here
         $mToMEntity->save();
         $mToMEntity->addReferencedEntity($this);
-        $mToMEntity->addReferencedEntity($otherModel);
+        $mToMEntity->addReferencedEntity($otherEntity);
 
         return $mToMEntity;
     }
@@ -60,19 +60,19 @@ trait ModelWithMToMTrait
      *  method used to remove a MToMModel record like StudentToLesson. Either used from Student or Lesson class.
      *  GuestToGroup etc.
      *
-     * @param MToMModel $mToMModel
-     * @param string|int|Model $otherModel //if string or int, then it's only an ID
-     * @return MToMModel
+     * @param IntermediateModel $mToMModel
+     * @param int|Model $otherEntity //if int, then it's only an ID
+     * @return IntermediateModel
      * @throws Exception
      */
-    public function removeMToMRelation(MToMModel $mToMModel, string|int|Model $otherModel): MToMModel
+    public function removeMToMRelation(IntermediateModel $mToMModel, int|Model $otherEntity): IntermediateModel
     {
         //$this needs to be loaded to get ID
         $this->assertIsLoaded();
-        $otherModel = $this->getOtherEntity($otherModel, $mToMModel);
+        $otherEntity = $this->getOtherEntity($otherEntity, $mToMModel);
 
         $mToMModel->addConditionForModel($this);
-        $mToMModel->addConditionForModel($otherModel);
+        $mToMModel->addConditionForModel($otherEntity);
         //loadAny as it will throw exception when record is not found
         $mToMModel = $mToMModel->loadAny();
         $mToMModel->delete();
@@ -85,18 +85,18 @@ trait ModelWithMToMTrait
      * checks if a MtoM reference to the given entity exists or not, e.g. if a StudentToLesson record exists for a
      * specific student and lesson
      *
-     * @param MToMModel $mToMModel
-     * @param string|int|Model $otherModel //if string or int, then it's only an ID
+     * @param IntermediateModel $mToMModel
+     * @param int|Model $otherEntity //if int, then it's only an ID
      * @return bool
      * @throws Exception
      */
-    public function hasMToMRelation(MToMModel $mToMModel, string|int|Model $otherModel): bool
+    public function hasMToMRelation(IntermediateModel $mToMModel, int|Model $otherEntity): bool
     {
         $this->assertIsLoaded();
-        $otherModel = $this->getOtherEntity($otherModel, $mToMModel);
+        $otherEntity = $this->getOtherEntity($otherEntity, $mToMModel);
 
         $mToMModel->addConditionForModel($this);
-        $mToMModel->addConditionForModel($otherModel);
+        $mToMModel->addConditionForModel($otherEntity);
         $mToMEntity = $mToMModel->tryLoadAny();
 
         return $mToMEntity !== null;
@@ -108,7 +108,7 @@ trait ModelWithMToMTrait
      * This way, no outdated intermediate models exist.
      * Returns HasMany reference for further modifying reference if needed.
      *
-     * @param class-string<MToMModel> $mtomClassName
+     * @param class-string<IntermediateModel> $mtomClassName
      * @param string $referenceName
      * @param array<string,mixed> $referenceDefaults
      * @param array<string,mixed> $mtomClassDefaults
@@ -156,12 +156,12 @@ trait ModelWithMToMTrait
      * Make sure passed model is of the correct class.
      * Check other model is loaded so id can be gotten.
      *
-     * @param string|int|Model $otherEntity //if string or int, then it's only an ID
-     * @param MToMModel $mToMModel
+     * @param int|Model $otherEntity //if int, then it's only an ID
+     * @param IntermediateModel $mToMModel
      * @return Model
      * @throws Exception
      */
-    protected function getOtherEntity(string|int|Model $otherEntity, MToMModel $mToMModel): Model
+    protected function getOtherEntity(int|Model $otherEntity, IntermediateModel $mToMModel): Model
     {
         $otherModelClass = $mToMModel->getOtherModelClass($this);
         if (is_object($otherEntity)) {

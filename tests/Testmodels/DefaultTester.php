@@ -1,15 +1,15 @@
 <?php declare(strict_types=1);
 
-namespace mtomforatk\tests\testmodels;
+namespace PhilippR\Atk4\MToM\Tests\Testmodels;
 
 use Atk4\Data\Exception;
 use Atk4\Data\Model;
-use mtomforatk\ModelWithMToMTrait;
+use PhilippR\Atk4\MToM\MToMTait;
 
 
 class DefaultTester extends Model
 {
-    use ModelWithMToMTrait;
+    use MToMTait;
 
     public $table = 'student';
 

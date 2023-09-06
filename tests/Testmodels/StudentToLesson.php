@@ -1,14 +1,14 @@
 <?php declare(strict_types=1);
 
-namespace mtomforatk\tests\testmodels;
+namespace PhilippR\Atk4\MToM\Tests\Testmodels;
 
-use mtomforatk\MToMModel;
+use PhilippR\Atk4\MToM\IntermediateModel;
 
-class StudentToLesson extends MToMModel
+class StudentToLesson extends IntermediateModel
 {
     public $table = 'student_to_lesson';
 
-    protected array $fieldNamesForReferencedEntities =
+    protected array $relationFieldNames =
         [
             'student_id' => Student::class,
             'lesson_id' => Lesson::class

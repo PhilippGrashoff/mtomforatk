@@ -1,15 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace mtomforatk\tests;
+namespace PhilippR\Atk4\MToM\Tests;
 
 use Atk4\Data\Exception;
 use Atk4\Data\Model;
 use atkextendedtestcase\TestCase;
-use mtomforatk\MToMModel;
-use mtomforatk\tests\testmodels\Lesson;
-use mtomforatk\tests\testmodels\Student;
-use mtomforatk\tests\testmodels\StudentToLesson;
-use mtomforatk\tests\testmodels\Teacher;
+use PhilippR\Atk4\MToM\IntermediateModel;
+use PhilippR\Atk4\MToM\Tests\Testmodels\Lesson;
+use PhilippR\Atk4\MToM\Tests\Testmodels\Student;
+use PhilippR\Atk4\MToM\Tests\Testmodels\StudentToLesson;
+use PhilippR\Atk4\MToM\Tests\Testmodels\Teacher;
+use ReflectionClass;
 
 
 class MToMModelTest extends TestCase
@@ -33,8 +34,8 @@ class MToMModelTest extends TestCase
     public function testExceptionMoreThanTwoElementsInFieldNamesForReferencedClasses(): void
     {
         $persistence = $this->getSqliteTestPersistence();
-        $someClassWith3Elements = new class() extends MToMModel {
-            protected array $fieldNamesForReferencedEntities = [
+        $someClassWith3Elements = new class() extends IntermediateModel {
+            protected array $relationFieldNames = [
                 'field1' => 'Blabla',
                 'field2' => 'DaDa',
                 'field3' => 'Gaga'
@@ -47,8 +48,8 @@ class MToMModelTest extends TestCase
     public function testExceptionLessThanTwoElementsInFieldNamesForReferencedClasses(): void
     {
         $persistence = $this->getSqliteTestPersistence();
-        $someClassWith1Element = new class() extends MToMModel {
-            protected array $fieldNamesForReferencedEntities = [
+        $someClassWith1Element = new class() extends IntermediateModel {
+            protected array $relationFieldNames = [
                 'field1' => 'Blabla'
             ];
         };
@@ -59,8 +60,8 @@ class MToMModelTest extends TestCase
     public function testExceptionInvalidClassInFieldNamesForReferencedClasses(): void
     {
         $persistence = $this->getSqliteTestPersistence();
-        $someClassWithInvalidClassDefinition = new class() extends MToMModel {
-            protected array $fieldNamesForReferencedEntities = [
+        $someClassWithInvalidClassDefinition = new class() extends IntermediateModel {
+            protected array $relationFieldNames = [
                 'field1' => Student::class,
                 'field2' => 'SomeNonExistantModel'
             ];
@@ -73,7 +74,7 @@ class MToMModelTest extends TestCase
     {
         $persistence = $this->getSqliteTestPersistence();
         $studentToLesson = new StudentToLesson($persistence);
-        $referencedEntities = (new \ReflectionClass($studentToLesson))->getProperty('referencedEntities');
+        $referencedEntities = (new ReflectionClass($studentToLesson))->getProperty('referencedEntities');
         $referencedEntities->setAccessible(true);
         $value = $referencedEntities->getValue($studentToLesson);
         self::assertIsArray($value);
@@ -88,7 +89,7 @@ class MToMModelTest extends TestCase
         $student->save();
         $studentToLesson = new StudentToLesson($persistence);
         $studentToLesson->addReferencedEntity($student);
-        $props = (new \ReflectionClass($studentToLesson))->getProperty(
+        $props = (new ReflectionClass($studentToLesson))->getProperty(
             'referencedEntities'
         );//getProperties(\ReflectionProperty::IS_PROTECTED);
         $props->setAccessible(true);
@@ -202,7 +203,7 @@ class MToMModelTest extends TestCase
         $teacher = (new Teacher($persistence))->createEntity();
         $teacher->save();
         self::expectExceptionMessage(
-            'This mtomforatk\MToMModel does not have a reference to mtomforatk\tests\testmodels\Teacher'
+            'This PhilippR\Atk4\MToM\MToMModel does not have a reference to mtomforatk\tests\Testmodels\Teacher'
         );
         $studentToLesson->addReferencedEntity($teacher);
     }
@@ -223,11 +224,11 @@ class MToMModelTest extends TestCase
         $studentToLesson->addConditionForModel($lesson);
         $studentToLesson->addConditionForModel($student);
         $studentToLesson = $studentToLesson->loadAny();
-        self::assertEquals(
+        self::assertSame(
             234,
             $studentToLesson->get('lesson_id')
         );
-        self::assertEquals(
+        self::assertSame(
             456,
             $studentToLesson->get('student_id')
         );

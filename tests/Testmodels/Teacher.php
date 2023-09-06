@@ -1,16 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace mtomforatk\tests\testmodels;
+namespace PhilippR\Atk4\MToM\Tests\Testmodels;
 
 use Atk4\Data\Model;
-use mtomforatk\ModelWithMToMTrait;
+use PhilippR\Atk4\MToM\MToMTait;
 
 
-class Lesson extends Model
+class Teacher extends Model
 {
-    use ModelWithMToMTrait;
+    use MToMTait;
 
-    public $table = 'lesson';
+    public $table = 'teacher';
 
 
     protected function init(): void
@@ -19,7 +19,6 @@ class Lesson extends Model
 
         $this->addField('name');
 
-        $this->addMToMReferenceAndDeleteHook(StudentToLesson::class);
         $this->addMToMReferenceAndDeleteHook(TeacherToLesson::class);
     }
 }

@@ -1,16 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace mtomforatk;
+namespace PhilippR\Atk4\MToM;
 
 use Atk4\Data\Exception;
 use Atk4\Data\Model;
 
 
-abstract class MToMModel extends Model
+abstract class IntermediateModel extends Model
 {
 
     /**
-     * @var  array<string,class-string|null> $fieldNamesForReferencedEntities
+     * @var  array<string,class-string|null> $relationFieldNames
      * with 2 keys and 2 values. Set these four strings child classes.
      * Will be used to create hasOne Reference Fields in init()
      * e.g. [
@@ -18,7 +18,7 @@ abstract class MToMModel extends Model
      *          'lesson_id' => Lesson::class
      *      ]
      */
-    protected array $fieldNamesForReferencedEntities = [];
+    protected array $relationFieldNames = [];
 
     /**
      * @var array<class-string,Model|null> $referencedEntities
@@ -38,19 +38,19 @@ abstract class MToMModel extends Model
     {
         parent::init();
         //make sure 2 classes to link are defined
-        if (count($this->fieldNamesForReferencedEntities) !== 2) {
+        if (count($this->relationFieldNames) !== 2) {
             throw new Exception(
                 '2 Fields and corresponding classes need to be defined in fieldNamesForReferencedClasses array'
             );
         }
         if (
-            !class_exists(reset($this->fieldNamesForReferencedEntities))
-            || !class_exists(end($this->fieldNamesForReferencedEntities))
+            !class_exists(reset($this->relationFieldNames))
+            || !class_exists(end($this->relationFieldNames))
         ) {
-            throw new Exception('Non existent Class defined in fieldNamesForReferencedClasses array');
+            throw new Exception('Non existent Class defined in $relationFieldNames array');
         }
 
-        foreach ($this->fieldNamesForReferencedEntities as $fieldName => $className) {
+        foreach ($this->relationFieldNames as $fieldName => $className) {
             /** @var class-string $className */
             $this->hasOne($fieldName, ['model' => [$className], 'required' => true]);
             $this->referencedEntities[$className] = null;
@@ -64,7 +64,7 @@ abstract class MToMModel extends Model
      *  $lesson = $studentToLesson->getReferenceEntity(Lesson::class); //will return Lesson record with ID 4
      *
      * @param class-string<Model> $className
-     * @return Model|null
+     * @return Model
      * @throws Exception
      */
     public function getReferencedEntity(string $className): Model
@@ -79,7 +79,7 @@ abstract class MToMModel extends Model
             $model = new $className($this->getPersistence());
             //will throw exception if record isn't found
             $this->referencedEntities[$className] = $model->load(
-                $this->get(array_search($className, $this->fieldNamesForReferencedEntities))
+                $this->get(array_search($className, $this->relationFieldNames))
             );
         }
 
@@ -116,7 +116,7 @@ abstract class MToMModel extends Model
      */
     public function getFieldNameForModel(Model $model): string
     {
-        $fieldName = array_search(get_class($model), $this->fieldNamesForReferencedEntities);
+        $fieldName = array_search(get_class($model), $this->relationFieldNames);
         if (!$fieldName) {
             throw new Exception(
                 'No field name defined in $fieldNamesForReferencedEntities for Class ' . get_class($model)
@@ -152,14 +152,14 @@ abstract class MToMModel extends Model
     public function getOtherModelClass(Model $model): string
     {
         $modelClass = get_class($model);
-        if (!in_array($modelClass, $this->fieldNamesForReferencedEntities)) {
+        if (!in_array($modelClass, $this->relationFieldNames)) {
             throw new Exception('Class ' . $modelClass . 'not found in fieldNamesForReferencedClasses');
         }
 
         //as array has 2 elements, return second if passed class is the first, else otherwise
-        if (reset($this->fieldNamesForReferencedEntities) === $modelClass) {
-            return end($this->fieldNamesForReferencedEntities);
+        if (reset($this->relationFieldNames) === $modelClass) {
+            return end($this->relationFieldNames);
         }
-        return reset($this->fieldNamesForReferencedEntities);
+        return reset($this->relationFieldNames);
     }
 }

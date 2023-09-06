@@ -14,12 +14,12 @@
   },
   "autoload": {
     "psr-4": {
-      "mtomforatk\\": "src"
+      "PhilippR\\Atk4\\MToM\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "mtomforatk\\tests\\": "tests"
+      "PhilippR\\Atk4\\MToM\\Tests\\": "tests"
     }
   }
 }
