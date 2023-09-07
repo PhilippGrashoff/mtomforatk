@@ -22,4 +22,19 @@ class Lesson extends Model
         $this->addMToMReferenceAndDeleteHook(StudentToLesson::class);
         $this->addMToMReferenceAndDeleteHook(TeacherToLesson::class);
     }
+
+    public function addStudent($student, array $additionalFields = []): StudentToLesson
+    {
+        return $this->addMToMRelation(new StudentToLesson($this->getPersistence()), $student, $additionalFields);
+    }
+
+    public function removeStudent($student): StudentToLesson
+    {
+        return $this->removeMToMRelation(new StudentToLesson($this->getPersistence()), $student);
+    }
+
+    public function hasStudent($student): bool
+    {
+        return $this->hasMToMRelation(new StudentToLesson($this->getPersistence()), $student);
+    }
 }

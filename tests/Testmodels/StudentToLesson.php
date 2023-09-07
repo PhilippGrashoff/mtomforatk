@@ -2,9 +2,9 @@
 
 namespace PhilippR\Atk4\MToM\Tests\Testmodels;
 
-use PhilippR\Atk4\MToM\IntermediateModel;
+use PhilippR\Atk4\MToM\JunctionModel;
 
-class StudentToLesson extends IntermediateModel
+class StudentToLesson extends JunctionModel
 {
     public $table = 'student_to_lesson';
 

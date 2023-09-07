@@ -6,7 +6,7 @@ use Atk4\Data\Exception;
 use Atk4\Data\Model;
 
 
-abstract class IntermediateModel extends Model
+abstract class JunctionModel extends Model
 {
 
     /**
@@ -88,7 +88,7 @@ abstract class IntermediateModel extends Model
 
 
     /**
-     *  used by ModelWithMToMTrait to make records available in getReferencedEntity() without extra DB request
+     *  used by MToMTrait to make records available in getReferencedEntity() without extra DB request
      *
      * @param Model $entity
      * @return void
@@ -108,7 +108,7 @@ abstract class IntermediateModel extends Model
 
 
     /**
-     *  used by ModelWithMToMTrait to get the correct field name that corresponds to one of the linked Models
+     *  used by MToMTrait to get the correct field name that corresponds to one of the linked Models
      *
      * @param Model $model
      * @return string
@@ -142,7 +142,7 @@ abstract class IntermediateModel extends Model
 
 
     /**
-     * We will have 2 Model classes defined which the MToMModel will connect. This function returns the class name of
+     * We have 2 Model classes defined which the JunctionModel will connect. This function returns the class name of
      * the other class if one is passed
      *
      * @param Model $model

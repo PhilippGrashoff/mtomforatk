@@ -5,7 +5,7 @@ namespace PhilippR\Atk4\MToM\Tests;
 use Atk4\Data\Exception;
 use Atk4\Data\Model;
 use atkextendedtestcase\TestCase;
-use PhilippR\Atk4\MToM\IntermediateModel;
+use PhilippR\Atk4\MToM\JunctionModel;
 use PhilippR\Atk4\MToM\Tests\Testmodels\Lesson;
 use PhilippR\Atk4\MToM\Tests\Testmodels\Student;
 use PhilippR\Atk4\MToM\Tests\Testmodels\StudentToLesson;
@@ -13,7 +13,7 @@ use PhilippR\Atk4\MToM\Tests\Testmodels\Teacher;
 use ReflectionClass;
 
 
-class MToMModelTest extends TestCase
+class IntermediateModelTest extends TestCase
 {
     protected array $sqlitePersistenceModels = [
         Student::class,
@@ -34,7 +34,7 @@ class MToMModelTest extends TestCase
     public function testExceptionMoreThanTwoElementsInFieldNamesForReferencedClasses(): void
     {
         $persistence = $this->getSqliteTestPersistence();
-        $someClassWith3Elements = new class() extends IntermediateModel {
+        $someClassWith3Elements = new class() extends JunctionModel {
             protected array $relationFieldNames = [
                 'field1' => 'Blabla',
                 'field2' => 'DaDa',
@@ -48,7 +48,7 @@ class MToMModelTest extends TestCase
     public function testExceptionLessThanTwoElementsInFieldNamesForReferencedClasses(): void
     {
         $persistence = $this->getSqliteTestPersistence();
-        $someClassWith1Element = new class() extends IntermediateModel {
+        $someClassWith1Element = new class() extends JunctionModel {
             protected array $relationFieldNames = [
                 'field1' => 'Blabla'
             ];
@@ -60,7 +60,7 @@ class MToMModelTest extends TestCase
     public function testExceptionInvalidClassInFieldNamesForReferencedClasses(): void
     {
         $persistence = $this->getSqliteTestPersistence();
-        $someClassWithInvalidClassDefinition = new class() extends IntermediateModel {
+        $someClassWithInvalidClassDefinition = new class() extends JunctionModel {
             protected array $relationFieldNames = [
                 'field1' => Student::class,
                 'field2' => 'SomeNonExistantModel'
@@ -203,7 +203,7 @@ class MToMModelTest extends TestCase
         $teacher = (new Teacher($persistence))->createEntity();
         $teacher->save();
         self::expectExceptionMessage(
-            'This PhilippR\Atk4\MToM\MToMModel does not have a reference to mtomforatk\tests\Testmodels\Teacher'
+            'This PhilippR\Atk4\MToM\JunctionModel does not have a reference to PhilippR\Atk4\MToM\Tests\Testmodels\Teacher'
         );
         $studentToLesson->addReferencedEntity($teacher);
     }

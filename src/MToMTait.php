@@ -17,18 +17,18 @@ trait MToMTait
      *  Create a new MToM relation, e.g. a new StudentToLesson record. Called from either Student or Lesson class.
      *  First checks if record does exist already, and only then adds new relation.
      *
-     * @param IntermediateModel $mToMModel
+     * @param JunctionModel $mToMModel
      * @param int|Model $otherEntity //if int, then it's only an ID
      * @param array<string,mixed> $additionalFields
-     * @return IntermediateModel
+     * @return JunctionModel
      * @throws Exception
      * @throws \Atk4\Core\Exception
      */
     public function addMToMRelation(
-        IntermediateModel $mToMModel,
+        JunctionModel $mToMModel,
         int|Model $otherEntity,
         array $additionalFields = []
-    ): IntermediateModel {
+    ): JunctionModel {
         //$this needs to be loaded to get ID
         $this->assertIsLoaded();
         $otherEntity = $this->getOtherEntity($otherEntity, $mToMModel);
@@ -60,12 +60,12 @@ trait MToMTait
      *  method used to remove a MToMModel record like StudentToLesson. Either used from Student or Lesson class.
      *  GuestToGroup etc.
      *
-     * @param IntermediateModel $mToMModel
+     * @param JunctionModel $mToMModel
      * @param int|Model $otherEntity //if int, then it's only an ID
-     * @return IntermediateModel
+     * @return JunctionModel
      * @throws Exception
      */
-    public function removeMToMRelation(IntermediateModel $mToMModel, int|Model $otherEntity): IntermediateModel
+    public function removeMToMRelation(JunctionModel $mToMModel, int|Model $otherEntity): JunctionModel
     {
         //$this needs to be loaded to get ID
         $this->assertIsLoaded();
@@ -85,12 +85,12 @@ trait MToMTait
      * checks if a MtoM reference to the given entity exists or not, e.g. if a StudentToLesson record exists for a
      * specific student and lesson
      *
-     * @param IntermediateModel $mToMModel
+     * @param JunctionModel $mToMModel
      * @param int|Model $otherEntity //if int, then it's only an ID
      * @return bool
      * @throws Exception
      */
-    public function hasMToMRelation(IntermediateModel $mToMModel, int|Model $otherEntity): bool
+    public function hasMToMRelation(JunctionModel $mToMModel, int|Model $otherEntity): bool
     {
         $this->assertIsLoaded();
         $otherEntity = $this->getOtherEntity($otherEntity, $mToMModel);
@@ -103,12 +103,12 @@ trait MToMTait
     }
 
     /**
-     * 1) adds HasMany Reference to intermediate model.
-     * 2) adds after delete hook which deletes any intermediate model linked to the deleted "main" model.
-     * This way, no outdated intermediate models exist.
+     * 1) adds HasMany Reference linking the junction model.
+     * 2) adds after delete hook which deletes any junctions models linked to the deleted "main" model.
+     * This way, no outdated junction models exist.
      * Returns HasMany reference for further modifying reference if needed.
      *
-     * @param class-string<IntermediateModel> $mtomClassName
+     * @param class-string<JunctionModel> $mtomClassName
      * @param string $referenceName
      * @param array<string,mixed> $referenceDefaults
      * @param array<string,mixed> $mtomClassDefaults
@@ -157,11 +157,11 @@ trait MToMTait
      * Check other model is loaded so id can be gotten.
      *
      * @param int|Model $otherEntity //if int, then it's only an ID
-     * @param IntermediateModel $mToMModel
+     * @param JunctionModel $mToMModel
      * @return Model
      * @throws Exception
      */
-    protected function getOtherEntity(int|Model $otherEntity, IntermediateModel $mToMModel): Model
+    protected function getOtherEntity(int|Model $otherEntity, JunctionModel $mToMModel): Model
     {
         $otherModelClass = $mToMModel->getOtherModelClass($this);
         if (is_object($otherEntity)) {
