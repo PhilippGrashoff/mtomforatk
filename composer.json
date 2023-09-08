@@ -9,8 +9,7 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5.25",
-    "phpstan/phpstan": "1.*",
-    "philippgrashoff/atkextendedtestcase": "4.*"
+    "phpstan/phpstan": "1.*"
   },
   "autoload": {
     "psr-4": {

@@ -12,7 +12,6 @@ class DefaultTester extends Model
     use MToMTait;
 
     public $table = 'student';
-
     protected array $referenceDefaults = [];
     protected array $mToMModelDefaults = [];
 
