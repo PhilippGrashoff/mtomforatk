@@ -76,7 +76,7 @@ abstract class JunctionModel extends Model
 
         //load if necessary
         if ($this->referencedEntities[$className] === null) {
-            $model = new $className($this->getPersistence());
+            $model = new $className($this->getModel()->getPersistence());
             //will throw exception if record isn't found
             $this->referencedEntities[$className] = $model->load(
                 $this->get(array_search($className, $this->relationFieldNames))

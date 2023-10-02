@@ -14,7 +14,7 @@ use PhilippR\Atk4\MToM\Tests\Testmodels\Teacher;
 use ReflectionClass;
 
 
-class IntermediateModelTest extends TestCase
+class JunctionModelTest extends TestCase
 {
 
     protected function setUp(): void
@@ -107,7 +107,7 @@ class IntermediateModelTest extends TestCase
         $otherClass = new class() extends Model {
             public $table = 'sometable';
         };
-        $model = new $otherClass($this->db);
+        $model = (new $otherClass($this->db))->createEntity();
         $studentToLesson = new StudentToLesson($this->db);
         self::expectException(Exception::class);
         $studentToLesson->addReferencedEntity($model);
@@ -136,9 +136,9 @@ class IntermediateModelTest extends TestCase
 
     public function testGetReferencedEntityExceptionInvalidClass(): void
     {
-        $studentToLesson = new StudentToLesson($this->db);
+        $studentToLesson = (new StudentToLesson($this->db))->createEntity();
         self::expectException(Exception::class);
-        $resA = $studentToLesson->getReferencedEntity('SomeNonSetClass');
+        $studentToLesson->getReferencedEntity('SomeNonSetClass');
     }
 
     public function testGetFieldNameForModel(): void

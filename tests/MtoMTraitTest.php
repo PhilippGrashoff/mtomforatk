@@ -17,7 +17,7 @@ use PhilippR\Atk4\MToM\Tests\Testmodels\StudentToLesson;
  * Class MToMTraitTest
  * @package PMRAtk\tests\phpunit\Data\Traits
  */
-class ModelWithMtoMTraitTest extends TestCase
+class MtoMTraitTest extends TestCase
 {
 
     protected function setUp(): void

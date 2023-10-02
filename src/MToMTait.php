@@ -174,7 +174,7 @@ trait MToMTait
             }
         } else {
             $id = $otherEntity;
-            $otherEntity = new $otherModelClass($this->getPersistence());
+            $otherEntity = new $otherModelClass($this->getModel()->getPersistence());
             $otherEntity = $otherEntity->tryLoad($id);
         }
 
