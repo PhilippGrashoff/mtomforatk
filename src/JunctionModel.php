@@ -4,6 +4,7 @@ namespace PhilippR\Atk4\MToM;
 
 use Atk4\Data\Exception;
 use Atk4\Data\Model;
+use Throwable;
 
 
 abstract class JunctionModel extends Model
@@ -18,7 +19,7 @@ abstract class JunctionModel extends Model
      *          'lesson_id' => Lesson::class
      *      ]
      */
-    protected array $relationFieldNames = [];
+    protected static array $relationFieldNames = [];
 
     /**
      * @var array<class-string,Model|null> $referencedEntities
@@ -57,7 +58,6 @@ abstract class JunctionModel extends Model
         }
     }
 
-
     /**
      *  Shortcut to get an entity from each of the linked classes. e.g.
      *  $studentToLesson = $student->addLesson(4); //add Lesson by ID, no lesson entity yet
@@ -86,7 +86,6 @@ abstract class JunctionModel extends Model
         return $this->referencedEntities[$className];
     }
 
-
     /**
      *  used by MToMTrait to make records available in getReferencedEntity() without extra DB request
      *
@@ -94,7 +93,6 @@ abstract class JunctionModel extends Model
      * @return void
      * @throws Exception
      */
-
     public function addReferencedEntity(Model $entity): void
     {
         $entity->assertIsEntity();
@@ -105,7 +103,6 @@ abstract class JunctionModel extends Model
 
         $this->referencedEntities[$modelClass] = $entity;
     }
-
 
     /**
      *  used by MToMTrait to get the correct field name that corresponds to one of the linked Models
@@ -134,7 +131,7 @@ abstract class JunctionModel extends Model
      * @return void
      * @throws Exception
      */
-    public function addConditionForModel(Model $entity): void
+    protected function addConditionForModel(Model $entity): void
     {
         $entity->assertIsEntity();
         $this->addCondition($this->getFieldNameForModel($entity), $entity->getId());
@@ -149,17 +146,145 @@ abstract class JunctionModel extends Model
      * @return class-string<Model>
      * @throws Exception
      */
-    public function getOtherModelClass(Model $model): string
+    public static function getOtherModelClass(Model $model): string
     {
         $modelClass = get_class($model);
-        if (!in_array($modelClass, $this->relationFieldNames)) {
+        if (!in_array($modelClass, self::$relationFieldNames)) {
             throw new Exception('Class ' . $modelClass . 'not found in fieldNamesForReferencedClasses');
         }
 
         //as array has 2 elements, return second if passed class is the first, else otherwise
-        if (reset($this->relationFieldNames) === $modelClass) {
-            return end($this->relationFieldNames);
+        if (reset(self::$relationFieldNames) === $modelClass) {
+            return end(self::$relationFieldNames);
         }
-        return reset($this->relationFieldNames);
+        return reset(self::$relationFieldNames);
+    }
+
+    /**
+     * Used to load the other model if only ID was passed.
+     * Make sure passed model is of the correct class.
+     * Check other model is loaded so id can be gotten.
+     *
+     * @param Model $entity
+     * @param int|Model $otherEntity //if int, then it's only an ID
+     * @return Model
+     * @throws Exception
+     */
+    protected static function getOtherEntity(Model $entity, Model|int $otherEntity): Model
+    {
+        $entity->assertIsLoaded();
+        $otherModelClass = self::getOtherModelClass($entity);
+        if (is_object($otherEntity)) {
+            //only check if it's a model of the correct class; also check if accidentally $this was passed
+            if (get_class($otherEntity) !== $otherModelClass) {
+                throw new Exception(
+                    'Object of wrong class was passed: ' . $otherModelClass
+                    . 'expected, ' . get_class($otherEntity) . ' passed.'
+                );
+            }
+        } else {
+            $id = $otherEntity;
+            $otherEntity = new $otherModelClass($entity->getModel()->getPersistence());
+            $otherEntity = $otherEntity->tryLoad($id);
+        }
+
+        //make sure entity is loaded
+        if (!$otherEntity || !$otherEntity->isLoaded()) {
+            throw new Exception('otherEntity could not be loaded in ' . __FUNCTION__);
+        }
+
+        return $otherEntity;
+    }
+
+
+    /**
+     *  Create a new MToM relation, e.g. a new StudentToLesson record. Called from either Student or Lesson class.
+     *  First checks if record does exist already, and only then adds new relation.
+     *
+     * @param Model $entity
+     * @param int|Model $otherEntity //if int, then it's only an ID
+     * @param array<string,mixed> $additionalFields
+     * @return JunctionModel
+     * @throws Exception
+     * @throws \Atk4\Core\Exception|Throwable
+     */
+    public static function addMToMRelation(
+        Model $entity,
+        Model|int $otherEntity,
+        array $additionalFields = []
+    ): static {
+        $otherEntity = self::getOtherEntity($entity, $otherEntity);
+
+        $mToMModel = new static($entity->getModel()->getPersistence());
+        //check if reference already exists, if so update existing record only
+        $mToMModel->addConditionForModel($entity);
+        $mToMModel->addConditionForModel($otherEntity);
+        //no reload necessary after insert
+        $mToMModel->reloadAfterSave = false;
+        $mToMEntity = $mToMModel->tryLoadAny() ?? $mToMModel->createEntity();
+
+        $mToMEntity->set($mToMEntity->getFieldNameForModel($entity), $entity->getId());
+        $mToMEntity->set($mToMEntity->getFieldNameForModel($otherEntity), $otherEntity->getId());
+
+        //set additional field values
+        foreach ($additionalFields as $fieldName => $value) {
+            $mToMEntity->set($fieldName, $value);
+        }
+
+        //if that record already exists mysql will throw an error if unique index is set, catch here
+        $mToMEntity->save();
+        $mToMEntity->addReferencedEntity($entit);
+        $mToMEntity->addReferencedEntity($otherEntity);
+
+        return $mToMEntity;
+    }
+
+
+    /**
+     *  method used to remove a MToMModel record like StudentToLesson. Either used from Student or Lesson class.
+     *  GuestToGroup etc.
+     *
+     * @param Model $entity
+     * @param int|Model $otherEntity //if int, then it's only an ID
+     * @return JunctionModel
+     * @throws Exception
+     */
+    public static function removeMToMRelation(Model $entity, int|Model $otherEntity): JunctionModel
+    {
+        //$this needs to be loaded to get ID
+        $entity->assertIsLoaded();
+        $otherEntity = self::getOtherEntity($entity, $otherEntity);
+
+        $mToMModel = new static($entity->getModel()->getPersistence());
+        $mToMModel->addConditionForModel($entity);
+        $mToMModel->addConditionForModel($otherEntity);
+        //loadAny as it will throw exception when record is not found
+        $mToMentity = $mToMModel->loadAny();
+        $mToMentity->delete();
+
+        return $mToMentity;
+    }
+
+
+    /**
+     * checks if a MtoM reference to the given entity exists or not, e.g. if a StudentToLesson record exists for a
+     * specific student and lesson
+     *
+     * @param Model $entity
+     * @param int|Model $otherEntity //if int, then it's only an ID
+     * @return bool
+     * @throws Exception
+     */
+    public static function hasMToMRelation(Model $entity, int|Model $otherEntity): bool
+    {
+        $entity->assertIsLoaded();
+        $otherEntity = self::getOtherEntity($entity, $otherEntity);
+
+        $mToMModel = new static($entity->getModel()->getPersistence());
+        $mToMModel->addConditionForModel($entity);
+        $mToMModel->addConditionForModel($otherEntity);
+        $mToMEntity = $mToMModel->tryLoadAny();
+
+        return $mToMEntity !== null;
     }
 }
