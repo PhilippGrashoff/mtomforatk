@@ -8,14 +8,14 @@ class StudentToLesson extends JunctionModel
 {
     public $table = 'student_to_lesson';
 
-    protected array $relationFieldNames =
+    protected static array $relationFieldNames =
         [
             'student_id' => Student::class,
             'lesson_id' => Lesson::class
         ];
 
     /**
-     * only used to add an additional field to test additionalFields parameter in tests
+     * only used to add a field to test additionalFields parameter in tests
      */
     protected function init(): void
     {

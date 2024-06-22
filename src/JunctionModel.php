@@ -39,19 +39,19 @@ abstract class JunctionModel extends Model
     {
         parent::init();
         //make sure 2 classes to link are defined
-        if (count($this->relationFieldNames) !== 2) {
+        if (count(static::$relationFieldNames) !== 2) {
             throw new Exception(
                 '2 Fields and corresponding classes need to be defined in fieldNamesForReferencedClasses array'
             );
         }
         if (
-            !class_exists(reset($this->relationFieldNames))
-            || !class_exists(end($this->relationFieldNames))
+            !class_exists(reset(static::$relationFieldNames))
+            || !class_exists(end(static::$relationFieldNames))
         ) {
             throw new Exception('Non existent Class defined in $relationFieldNames array');
         }
 
-        foreach ($this->relationFieldNames as $fieldName => $className) {
+        foreach (static::$relationFieldNames as $fieldName => $className) {
             /** @var class-string $className */
             $this->hasOne($fieldName, ['model' => [$className], 'required' => true]);
             $this->referencedEntities[$className] = null;
@@ -79,7 +79,7 @@ abstract class JunctionModel extends Model
             $model = new $className($this->getModel()->getPersistence());
             //will throw exception if record isn't found
             $this->referencedEntities[$className] = $model->load(
-                $this->get(array_search($className, $this->relationFieldNames))
+                $this->get(array_search($className, static::$relationFieldNames))
             );
         }
 
@@ -113,7 +113,7 @@ abstract class JunctionModel extends Model
      */
     public function getFieldNameForModel(Model $model): string
     {
-        $fieldName = array_search(get_class($model), $this->relationFieldNames);
+        $fieldName = array_search(get_class($model), static::$relationFieldNames);
         if (!$fieldName) {
             throw new Exception(
                 'No field name defined in $fieldNamesForReferencedEntities for Class ' . get_class($model)
@@ -149,15 +149,17 @@ abstract class JunctionModel extends Model
     public static function getOtherModelClass(Model $model): string
     {
         $modelClass = get_class($model);
-        if (!in_array($modelClass, self::$relationFieldNames)) {
-            throw new Exception('Class ' . $modelClass . 'not found in fieldNamesForReferencedClasses');
+        if (!in_array($modelClass, static::$relationFieldNames)) {
+            throw new Exception(
+                'Model ' . $modelClass . ' is not one of the Models having an MToM relation via ' . __CLASS__
+            );
         }
 
         //as array has 2 elements, return second if passed class is the first, else otherwise
-        if (reset(self::$relationFieldNames) === $modelClass) {
-            return end(self::$relationFieldNames);
+        if (reset(static::$relationFieldNames) === $modelClass) {
+            return end(static::$relationFieldNames);
         }
-        return reset(self::$relationFieldNames);
+        return reset(static::$relationFieldNames);
     }
 
     /**
@@ -233,7 +235,7 @@ abstract class JunctionModel extends Model
 
         //if that record already exists mysql will throw an error if unique index is set, catch here
         $mToMEntity->save();
-        $mToMEntity->addReferencedEntity($entit);
+        $mToMEntity->addReferencedEntity($entity);
         $mToMEntity->addReferencedEntity($otherEntity);
 
         return $mToMEntity;

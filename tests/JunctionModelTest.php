@@ -39,7 +39,7 @@ class JunctionModelTest extends TestCase
     public function testExceptionMoreThanTwoElementsInFieldNamesForReferencedClasses(): void
     {
         $someClassWith3Elements = new class() extends JunctionModel {
-            protected array $relationFieldNames = [
+            protected static array $relationFieldNames = [
                 'field1' => 'Blabla',
                 'field2' => 'DaDa',
                 'field3' => 'Gaga'
@@ -53,7 +53,7 @@ class JunctionModelTest extends TestCase
     public function testExceptionLessThanTwoElementsInFieldNamesForReferencedClasses(): void
     {
         $someClassWith1Element = new class() extends JunctionModel {
-            protected array $relationFieldNames = [
+            protected static array $relationFieldNames = [
                 'field1' => 'Blabla'
             ];
         };
@@ -65,7 +65,7 @@ class JunctionModelTest extends TestCase
     public function testExceptionInvalidClassInFieldNamesForReferencedClasses(): void
     {
         $someClassWithInvalidClassDefinition = new class() extends JunctionModel {
-            protected array $relationFieldNames = [
+            protected static array $relationFieldNames = [
                 'field1' => Student::class,
                 'field2' => 'SomeNonExistantModel'
             ];
@@ -182,7 +182,7 @@ class JunctionModelTest extends TestCase
     public function testSavingWithoutIDsOfEntitiesSetFails(): void
     {
         $studentToLesson = (new StudentToLesson($this->db))->createEntity();
-        self::expectExceptionMessage('Must not be null');
+        self::expectExceptionMessage('Must not be empty');
         $studentToLesson->save();
     }
 
@@ -209,11 +209,18 @@ class JunctionModelTest extends TestCase
         $student->set('id', 456);
         $student->save();
 
-        $student->addMToMRelation((new StudentToLesson($this->db)), $lesson);
+        StudentToLesson::addMToMRelation($student, $lesson);
 
         $studentToLesson = new StudentToLesson($this->db);
-        $studentToLesson->addConditionForModel($lesson);
-        $studentToLesson->addConditionForModel($student);
+        $addConditionHelper = \Closure::bind(
+            static function (Model $entity) use ($studentToLesson) {
+                $studentToLesson->addConditionForModel($entity);
+            },
+            null,
+            $studentToLesson
+        );
+        $addConditionHelper($lesson);
+        $addConditionHelper($student);
         $studentToLesson = $studentToLesson->loadAny();
         self::assertSame(
             234,
@@ -223,5 +230,211 @@ class JunctionModelTest extends TestCase
             456,
             $studentToLesson->get('student_id')
         );
+    }
+
+    public function testMToMAdding(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $lesson = (new Lesson($this->db))->createEntity();
+        $student->save();
+        $lesson->save();
+
+        $studentToLessonCount = (new StudentToLesson($this->db))->action('count')->getOne();
+        StudentToLesson::addMToMRelation($student, $lesson);
+        self::assertEquals(
+            $studentToLessonCount + 1,
+            (new StudentToLesson($this->db))->action('count')->getOne()
+        );
+
+        //adding again shouldn't create a new record
+        StudentToLesson::addMToMRelation($student, $lesson);
+        self::assertEquals(
+            $studentToLessonCount + 1,
+            (new StudentToLesson($this->db))->action('count')->getOne()
+        );
+
+        //changing order also doesn't create a new record
+        StudentToLesson::addMToMRelation($lesson, $student);
+        self::assertEquals(
+            $studentToLessonCount + 1,
+            (new StudentToLesson($this->db))->action('count')->getOne()
+        );
+    }
+
+    public function testMToMAddingThrowExceptionThisNotLoaded(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $lesson = (new Lesson($this->db))->createEntity();
+        $lesson->save();
+
+        self::expectException(Exception::class);
+        StudentToLesson::addMToMRelation($student, $lesson);
+    }
+
+    public function testMToMAddingThrowExceptionEntityNotLoaded(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $lesson = (new Lesson($this->db))->createEntity();
+        $student->save();
+
+        self::expectException(Exception::class);
+        StudentToLesson::addMToMRelation($student, $lesson);
+    }
+
+    public function testMToMAddingById(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $lesson = (new Lesson($this->db))->createEntity();
+        $student->save();
+        $lesson->save();
+
+        $studentToLessonCount = (new StudentToLesson($this->db))->action('count')->getOne();
+        StudentToLesson::addMToMRelation($student, $lesson->getId());
+        self::assertEquals(
+            $studentToLessonCount + 1,
+            (new StudentToLesson($this->db))->action('count')->getOne()
+        );
+    }
+
+    public function testMToMAddingByInvalidId(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $student->save();
+
+        self::expectException(Exception::class);
+        StudentToLesson::addMToMRelation($student, 123456);
+    }
+
+    public function testMToMRemoval(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $lesson = (new Lesson($this->db))->createEntity();
+        $student->save();
+        $lesson->save();
+
+        $studentToLessonCount = (new StudentToLesson($this->db))->action('count')->getOne();
+        StudentToLesson::addMToMRelation($student, $lesson);
+        self::assertEquals($studentToLessonCount + 1, (new StudentToLesson($this->db))->action('count')->getOne());
+        StudentToLesson::removeMToMRelation($student, $lesson);
+        //should be removed
+        self::assertEquals($studentToLessonCount, (new StudentToLesson($this->db))->action('count')->getOne());
+        //trying to remove again shouldnt work but throw exception
+        self::expectException(Exception::class);
+        StudentToLesson::removeMToMRelation($student, $lesson);
+    }
+
+    public function testMToMRemovalThrowExceptionThisNotLoaded(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $lesson = (new Lesson($this->db))->createEntity();
+        $lesson->save();
+
+        self::expectException(Exception::class);
+        StudentToLesson::removeMToMRelation($student, $lesson);
+    }
+
+    public function testMToMRemovalThrowExceptionEntityNotLoaded(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $lesson = (new Lesson($this->db))->createEntity();
+        $student->save();
+
+        self::expectException(Exception::class);
+        StudentToLesson::removeMToMRelation($student, $lesson);
+    }
+
+    public function testHasMToMReference(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $lesson = (new Lesson($this->db))->createEntity();
+        $student->save();
+        $lesson->save();
+
+        StudentToLesson::addMToMRelation($student, $lesson);
+        self::assertTrue(StudentToLesson::hasMToMRelation($student, $lesson));
+        self::assertTrue(StudentToLesson::hasMToMRelation($lesson, $student));
+
+        StudentToLesson::removeMToMRelation($student, $lesson);
+        self::assertFalse(StudentToLesson::hasMToMRelation($student, $lesson));
+        self::assertFalse(StudentToLesson::hasMToMRelation($lesson, $student));
+    }
+
+    public function testhasMToMRelationThrowExceptionThisNotLoaded(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $lesson = (new Lesson($this->db))->createEntity();
+        $lesson->save();
+
+        self::expectException(Exception::class);
+        StudentToLesson::hasMToMRelation($student, $lesson);
+    }
+
+    public function testhasMToMRelationThrowExceptionEntityNotLoaded(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $lesson = (new Lesson($this->db))->createEntity();
+        $student->save();
+
+        self::expectException(Exception::class);
+        StudentToLesson::hasMToMRelation($student, $lesson);
+    }
+
+    public function testMToMAddingWrongClassException(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $student->save();
+        self::expectException(Exception::class);
+        StudentToLesson::addMToMRelation($student, $student);
+    }
+
+    public function testMToMRemovalWrongClassException(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $lesson = (new Lesson($this->db))->createEntity();
+        $student->save();
+        $lesson->save();
+        StudentToLesson::addMToMRelation($student, $lesson);
+        self::expectException(Exception::class);
+        StudentToLesson::removeMToMRelation($student, $student);
+    }
+
+    public function testhasMToMRelationWrongClassException(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $lesson = (new Lesson($this->db))->createEntity();
+        $student->save();
+        $lesson->save();
+        StudentToLesson::addMToMRelation($student, $lesson);
+        self::expectException(Exception::class);
+        StudentToLesson::hasMToMRelation($student, $student);
+    }
+
+    public function testAddAdditionalFields(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $lesson = (new Lesson($this->db))->createEntity();
+        $student->save();
+        $lesson->save();
+
+        $studentToLessonCount = (new StudentToLesson($this->db))->action('count')->getOne();
+        StudentToLesson::addMToMRelation($student, $lesson, ['some_other_field' => 'LALA']);
+        self::assertEquals($studentToLessonCount + 1, (new StudentToLesson($this->db))->action('count')->getOne());
+
+        $mtommodel = new StudentToLesson($this->db);
+        $mtommodel = $mtommodel->loadAny();
+        self::assertSame('LALA', $mtommodel->get('some_other_field'));
+    }
+
+    public function testMToMModelIsReturned(): void
+    {
+        $student = (new Student($this->db))->createEntity();
+        $lesson = (new Lesson($this->db))->createEntity();
+        $student->save();
+        $lesson->save();
+
+        $res = StudentToLesson::addMToMRelation($student, $lesson);
+        self::assertInstanceOf(StudentToLesson::class, $res);
+        $res = StudentToLesson::removeMToMRelation($student, $lesson);
+        self::assertInstanceOf(StudentToLesson::class, $res);
     }
 }

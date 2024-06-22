@@ -9,7 +9,7 @@ class TeacherToLesson extends JunctionModel
 {
     public $table = 'teacher_to_lesson';
 
-    protected array $relationFieldNames =
+    protected static array $relationFieldNames =
         [
             'teacher_id' => Teacher::class,
             'lesson_id' => Lesson::class
