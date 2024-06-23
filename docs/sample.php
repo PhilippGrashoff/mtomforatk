@@ -3,6 +3,7 @@
 use Atk4\Data\Persistence\Sql;
 use PhilippR\Atk4\MToM\Tests\Testmodels\Lesson;
 use PhilippR\Atk4\MToM\Tests\Testmodels\Student;
+use PhilippR\Atk4\MToM\Tests\Testmodels\StudentToLesson;
 
 $persistence = new Sql('sqlite::memory:');
 
@@ -14,7 +15,7 @@ $lessonGeography->set('name', 'Geography');
 $lessonGeography->save();
 
 //now, lets easily add Harry to the Geography lesson:
-$studentHarry->addLesson($lessonGeography);
+StudentToLesson::addMToMRelation($studentHarry, $lessonGeography);
 //the above line created a StudentToLesson record with student_id = studentHarry's ID and lesson_id = lessonGeography's ID
 
 //let's add Harry to another lesson
@@ -22,20 +23,20 @@ $lessonBiology = (new Lesson($persistence))->createEntity();
 $lessonBiology->set('name', 'Biology');
 $lessonBiology->save();
 //adding/removing can either be done by passing the other model or only it's ID. In this case, we just pass the ID - that's what you typically get from UI
-$studentHarry->addLesson($lessonBiology->getId());
+StudentToLesson::addMToMRelation($studentHarry, $lessonBiology->getId());
 //this created another StudentToLesson record with student_id = studentHarry's ID and lesson_id = lessonBiology's ID
 
 //Let's easily check if an MToM relation exists
-$studentHarry->hasLesson($lessonGeography); //true;
+StudentToLesson::hasMToMRelation($studentHarry, $lessonGeography); //true;
 
 //harry is tired of Geography, lets remove him from this lesson:
-$studentHarry->removeLesson($lessonGeography);
+StudentToLesson::removeMToMRelation($studentHarry, $lessonGeography);
 //this removed the StudentToLesson Record linking Harry to Geography.
-$studentHarry->hasLesson($lessonGeography); //false
+StudentToLesson::hasMToMRelation($studentHarry, $lessonGeography);  //false
 
-//Linda attends both courses. Let's add Linda to both courses. But this time we do it the other way around: We use Lesson's helper functions:
+//Linda attends both courses. Let's add Linda to both courses. But this time we do it the other way around and pass the lesson model as first argument:
 $studentLinda = (new Student($persistence))->createEntity();
 $studentLinda->set('name', 'Linda');
 $studentLinda->save();
-$lessonGeography->addStudent($studentLinda);
-$lessonBiology->addStudent($studentLinda);
+StudentToLesson::addMToMRelation($lessonGeography, $studentLinda);
+StudentToLesson::addMToMRelation($lessonBiology, $studentLinda);
