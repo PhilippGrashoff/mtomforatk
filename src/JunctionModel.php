@@ -60,8 +60,9 @@ abstract class JunctionModel extends Model
 
     /**
      *  Shortcut to get an entity from each of the linked classes. e.g.
-     *  $studentToLesson = $student->addLesson(4); //add Lesson by ID, no lesson entity yet
+     *  $studentToLesson = StudentToLesson::addMToMRelation($student, 4);
      *  $lesson = $studentToLesson->getReferenceEntity(Lesson::class); //will return Lesson record with ID 4
+     *  the requested entity is returned without an extra DB request once it was loaded, e.g. by addMToMRelation()
      *
      * @param class-string<Model> $className
      * @return Model
@@ -87,7 +88,7 @@ abstract class JunctionModel extends Model
     }
 
     /**
-     *  used by MToMTrait to make records available in getReferencedEntity() without extra DB request
+     *  used to make records available in getReferencedEntity() without extra DB request
      *
      * @param Model $entity
      * @return void
@@ -105,7 +106,7 @@ abstract class JunctionModel extends Model
     }
 
     /**
-     *  used by MToMTrait to get the correct field name that corresponds to one of the linked Models
+     *  used to get the correct field name that corresponds to one of the linked Models
      *
      * @param Model $model
      * @return string
@@ -140,7 +141,7 @@ abstract class JunctionModel extends Model
 
     /**
      * We have 2 Model classes defined which the JunctionModel will connect. This function returns the class name of
-     * the other class if one is passed
+     * the other class if one is passed.
      *
      * @param Model $model
      * @return class-string<Model>
@@ -165,7 +166,7 @@ abstract class JunctionModel extends Model
     /**
      * Used to load the other model if only ID was passed.
      * Make sure passed model is of the correct class.
-     * Check other model is loaded so id can be gotten.
+     * Check other model is loaded so its ID can be used.
      *
      * @param Model $entity
      * @param int|Model $otherEntity //if int, then it's only an ID
@@ -200,7 +201,7 @@ abstract class JunctionModel extends Model
 
 
     /**
-     *  Create a new MToM relation, e.g. a new StudentToLesson record. Called from either Student or Lesson class.
+     *  Create a new MToM relation, e.g. a new StudentToLesson record.
      *  First checks if record does exist already, and only then adds new relation.
      *
      * @param Model $entity
@@ -243,8 +244,7 @@ abstract class JunctionModel extends Model
 
 
     /**
-     *  method used to remove a MToMModel record like StudentToLesson. Either used from Student or Lesson class.
-     *  GuestToGroup etc.
+     *  method used to remove a MToMModel record like StudentToLesson.
      *
      * @param Model $entity
      * @param int|Model $otherEntity //if int, then it's only an ID
