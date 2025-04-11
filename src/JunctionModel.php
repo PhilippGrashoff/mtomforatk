@@ -53,7 +53,7 @@ abstract class JunctionModel extends Model
 
         foreach (static::$relationFieldNames as $fieldName => $className) {
             /** @var class-string $className */
-            $this->hasOne($fieldName, ['model' => [$className], 'required' => true]);
+            $this->hasOne($fieldName, ['model' => [$className], 'required' => true, 'system' => true]);
             $this->referencedEntities[$className] = null;
         }
     }
