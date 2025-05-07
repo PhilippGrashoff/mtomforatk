@@ -5,11 +5,11 @@
   "prefer-stable": true,
   "require": {
     "php": "8.*",
-    "atk4/data": "5.*"
+    "atk4/data": "6.*"
   },
   "require-dev": {
-    "phpunit/phpunit": "^9.5.25",
-    "phpstan/phpstan": "1.*"
+    "phpunit/phpunit": "12.*",
+    "phpstan/phpstan": "2.*"
   },
   "autoload": {
     "psr-4": {
